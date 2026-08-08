@@ -35,7 +35,7 @@ def list_action_history_endpoint(
         .join(Shipment)\
         .filter(Shipment.company_id == current_user["company_id"])\
         .filter(AgentAction.status.in_(["approved", "executed", "rejected"]))\
-        .order_by(AgentAction.updated_at.desc())\
+        .order_by(AgentAction.id.desc())\
         .all()
 
 @router.post("/{action_id}/approve", response_model=AgentActionRead)
