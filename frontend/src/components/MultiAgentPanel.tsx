@@ -59,7 +59,7 @@ export const MultiAgentPanel: React.FC<MultiAgentPanelProps> = ({ actionId }) =>
       </div>
 
       {/* Live Agent Dialogue Transcript */}
-      <div className="space-y-2.5 mb-4">
+      <div className="space-y-2 mb-3 max-h-44 overflow-y-auto pr-1">
         {dialogue_transcript.map((item: any, idx: number) => {
           const isQA = item.speaker === 'QualityAssuranceAgent';
           const isCarrier = item.speaker === 'CarrierNegotiationAgent';
