@@ -77,7 +77,7 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
             </p>
           </div>
         ) : (
-          <div className="space-y-3 overflow-y-auto max-h-[380px] pr-1 relative z-10">
+          <div className="space-y-3 overflow-y-auto max-h-[460px] pr-1 relative z-10">
             {pendingActions.map((action) => {
               const trackingId = action.action_details?.tracking_id || `Action #${action.id}`;
               const carrier = action.action_details?.carrier || 'Carrier';
