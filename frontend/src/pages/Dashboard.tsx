@@ -58,10 +58,10 @@ export const Dashboard: React.FC = () => {
         destination: 'Boston, USA',
         carrier: 'DHL Express',
         temperature: 18.5,
-        latitude: 50.1109,
-        longitude: 8.6821,
+        current_location: { lat: 50.1109, lng: 8.6821 },
         value_usd: 350000,
-        status: 'in_transit'
+        status: 'in_transit',
+        estimated_delivery: new Date(Date.now() + 86400000 * 5).toISOString()
       });
       showNotification(`Simulated thermal breach ingested for ${trackingId}. AI Agent evaluating risk...`);
       setTimeout(() => {
@@ -69,7 +69,7 @@ export const Dashboard: React.FC = () => {
         refetchActions();
       }, 2500);
     } catch (err) {
-      showNotification('Failed to trigger simulation. Ensure API container is active.');
+      showNotification('Failed to trigger simulation. Verify API parameters.');
     } finally {
       setSimulating(false);
     }
