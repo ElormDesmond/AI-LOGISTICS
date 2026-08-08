@@ -53,15 +53,15 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
 
   const getStatusExplanation = (s: Shipment) => {
     if (s.status === 'at_risk') {
-      return `CRITICAL EXCURSION: Temp reading (${s.temperature !== undefined ? `${s.temperature}°C` : 'N/A'}) exceeds safe cold-chain limit (-20°C). Requires immediate reroute.`;
+      return `CRITICAL EXCURSION: Temp reading (${s.temperature !== undefined ? `${s.temperature}°C` : 'N/A'}) exceeds safe cold-chain limit (-20°C). Next Step: Review & approve REROUTE proposal in Action Queue.`;
     }
     if (s.status === 'rerouted') {
-      return `REROUTE IN PROGRESS: Re-booked priority express cold storage. Thermal chamber normalized to ${s.temperature !== undefined ? `${s.temperature}°C` : '-22.5°C'}.`;
+      return `REROUTE IN PROGRESS: Re-booked priority express cold storage. Thermal chamber normalized to ${s.temperature !== undefined ? `${s.temperature}°C` : '-22.5°C'}. Next Step: Monitor arrival at secondary hub.`;
     }
     if (s.status === 'delivered') {
-      return `DELIVERED: Chain of custody and GDP compliance certificates verified.`;
+      return `DELIVERED: Received & GDP compliance verified. Next Step: Batch release quality sign-off & ERP inventory release.`;
     }
-    return `NOMINAL TELEMETRY: Operating safely at ${s.temperature !== undefined ? `${s.temperature}°C` : '-24.5°C'} with active thermal margin.`;
+    return `NOMINAL TELEMETRY: Operating safely at ${s.temperature !== undefined ? `${s.temperature}°C` : '-24.5°C'} with active thermal margin. Next Step: Scheduled transit & automated polling.`;
   };
 
   const filteredShipments = shipments.filter(s => {

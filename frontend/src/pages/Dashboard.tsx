@@ -102,6 +102,33 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  const handleSimulateDelivered = async () => {
+    setSimulating(true);
+    try {
+      const trackingId = `TRK-DELIVERED-${Math.floor(1000 + Math.random() * 9000)}`;
+      await apiClient.post('/shipments', {
+        tracking_id: trackingId,
+        origin: 'Basel, Switzerland',
+        destination: 'Boston Distribution Hub, USA',
+        carrier: 'PharmaExpress ColdChain',
+        temperature: -21.0,
+        current_location: { lat: 42.3601, lng: -71.0589 },
+        value_usd: 600000,
+        status: 'delivered',
+        estimated_delivery: new Date().toISOString()
+      });
+      showNotification(`Delivered shipment ${trackingId} recorded. Chain of custody & GDP compliance verified.`);
+      setTimeout(() => {
+        refetchShipments();
+        refetchActions();
+      }, 2500);
+    } catch (err) {
+      showNotification('Failed to trigger delivered simulation.');
+    } finally {
+      setSimulating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#070a12] text-slate-100 p-4 sm:p-6 flex flex-col font-sans relative overflow-hidden">
       {/* Toast Notification Banner */}
@@ -137,21 +164,31 @@ export const Dashboard: React.FC = () => {
             <button
               onClick={handleSimulateNormal}
               disabled={simulating}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold transition active:scale-95"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-[11px] font-mono font-bold transition active:scale-95"
               title="Simulate a safe cold-chain shipment on course (-24.5°C) requiring zero actions"
             >
-              <Check size={13} className="text-cyan-400" />
-              <span>+ Normal (-24.5°C)</span>
+              <Check size={12} className="text-cyan-400" />
+              <span>+ Normal</span>
             </button>
 
             <button
               onClick={handleSimulateExcursion}
               disabled={simulating}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 text-xs font-mono font-bold transition active:scale-95 shadow-md shadow-rose-500/10"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 text-[11px] font-mono font-bold transition active:scale-95 shadow-md shadow-rose-500/10"
               title="Simulate a thermal breach (+18.5°C) to generate a pending action in the approval queue"
             >
-              <Activity size={13} className={simulating ? 'animate-spin text-rose-400' : 'text-rose-400 animate-pulse'} />
-              <span>+ Excursion (+18.5°C)</span>
+              <Activity size={12} className={simulating ? 'animate-spin text-rose-400' : 'text-rose-400 animate-pulse'} />
+              <span>+ Excursion</span>
+            </button>
+
+            <button
+              onClick={handleSimulateDelivered}
+              disabled={simulating}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono font-bold transition active:scale-95 shadow-md shadow-emerald-500/10"
+              title="Simulate a completed delivered shipment with verified GDP chain of custody"
+            >
+              <CheckCircle size={12} className="text-emerald-400" />
+              <span>+ Delivered</span>
             </button>
           </div>
 
