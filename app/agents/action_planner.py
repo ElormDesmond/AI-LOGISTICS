@@ -35,53 +35,83 @@ Output MUST be a JSON array of recommendation objects matching this schema:
 
 async def plan_actions_with_claude(risk_assessment: Dict[str, Any], shipment_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
-    Action Planning Agent utilizing Anthropic Claude API via LangChain / Anthropic SDK.
+    Action Planning Agent utilizing Gemini API or Anthropic Claude API.
     Recommends optimal cost-vs-risk mitigation strategies with human approval gates.
     """
-    if not settings.ANTHROPIC_API_KEY:
-        logger.warning("No ANTHROPIC_API_KEY provided; executing deterministic fallback action planning.")
-        return _deterministic_action_planner(risk_assessment, shipment_data)
+    user_content = f"""
+    Risk Assessment:
+    {json.dumps(risk_assessment, indent=2, default=str)}
 
-    try:
-        from langchain_anthropic import ChatAnthropic
-        from langchain_core.messages import SystemMessage, HumanMessage
+    Shipment Data:
+    {json.dumps(shipment_data, indent=2, default=str)}
 
-        llm = ChatAnthropic(
-            model="claude-3-5-sonnet-20241022",
-            anthropic_api_key=settings.ANTHROPIC_API_KEY,
-            temperature=0.1,
-            max_tokens=1000
-        )
+    What mitigation actions should we execute?
+    """
 
-        user_content = f"""
-        Risk Assessment:
-        {json.dumps(risk_assessment, indent=2, default=str)}
+    if settings.GEMINI_API_KEY:
+        try:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            from langchain_core.messages import SystemMessage, HumanMessage
 
-        Shipment Data:
-        {json.dumps(shipment_data, indent=2, default=str)}
+            llm = ChatGoogleGenerativeAI(
+                model="gemini-1.5-pro",
+                google_api_key=settings.GEMINI_API_KEY,
+                temperature=0.1,
+                max_output_tokens=1000
+            )
 
-        What mitigation actions should we execute?
-        """
+            messages = [
+                SystemMessage(content=CLAUDE_ACTION_PLANNER_PROMPT),
+                HumanMessage(content=user_content)
+            ]
 
-        messages = [
-            SystemMessage(content=CLAUDE_ACTION_PLANNER_PROMPT),
-            HumanMessage(content=user_content)
-        ]
+            response = await llm.ainvoke(messages)
+            content_str = str(response.content).strip()
 
-        response = await llm.ainvoke(messages)
-        content_str = response.content.strip()
+            if "```json" in content_str:
+                content_str = content_str.split("```json")[1].split("```")[0].strip()
+            elif "```" in content_str:
+                content_str = content_str.split("```")[1].split("```")[0].strip()
 
-        if "```json" in content_str:
-            content_str = content_str.split("```json")[1].split("```")[0].strip()
-        elif "```" in content_str:
-            content_str = content_str.split("```")[1].split("```")[0].strip()
+            actions = json.loads(content_str)
+            return actions if isinstance(actions, list) else [actions]
 
-        actions = json.loads(content_str)
-        return actions if isinstance(actions, list) else [actions]
+        except Exception as e:
+            logger.error(f"Gemini Action Planning Agent call failed: {str(e)}; trying fallback.")
 
-    except Exception as e:
-        logger.error(f"Claude Action Planning Agent call failed: {str(e)}; utilizing rule fallback.")
-        return _deterministic_action_planner(risk_assessment, shipment_data)
+    if settings.ANTHROPIC_API_KEY:
+        try:
+            from langchain_anthropic import ChatAnthropic
+            from langchain_core.messages import SystemMessage, HumanMessage
+
+            llm = ChatAnthropic(
+                model="claude-3-5-sonnet-20241022",
+                anthropic_api_key=settings.ANTHROPIC_API_KEY,
+                temperature=0.1,
+                max_tokens=1000
+            )
+
+            messages = [
+                SystemMessage(content=CLAUDE_ACTION_PLANNER_PROMPT),
+                HumanMessage(content=user_content)
+            ]
+
+            response = await llm.ainvoke(messages)
+            content_str = str(response.content).strip()
+
+            if "```json" in content_str:
+                content_str = content_str.split("```json")[1].split("```")[0].strip()
+            elif "```" in content_str:
+                content_str = content_str.split("```")[1].split("```")[0].strip()
+
+            actions = json.loads(content_str)
+            return actions if isinstance(actions, list) else [actions]
+
+        except Exception as e:
+            logger.error(f"Claude Action Planning Agent call failed: {str(e)}; utilizing rule fallback.")
+
+    logger.warning("No Gemini or Anthropic API key provided; executing deterministic fallback action planning.")
+    return _deterministic_action_planner(risk_assessment, shipment_data)
 
 def _deterministic_action_planner(risk_assessment: Dict[str, Any], shipment_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     score = risk_assessment.get("risk_score", 0.0)

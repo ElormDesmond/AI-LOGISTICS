@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     
     # AI Engine
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 
     class Config:
         env_file = ".env"

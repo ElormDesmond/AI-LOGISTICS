@@ -40,45 +40,73 @@ Output MUST be a valid JSON object matching this structure:
 
 async def evaluate_shipment_with_claude(shipment_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Evaluates shipment risk using Anthropic Claude API via LangChain / Anthropic SDK.
-    Falls back to deterministic risk engine if API key is not set or network fails.
+    Evaluates shipment risk using Gemini API or Anthropic Claude API via LangChain.
+    Falls back to deterministic risk engine if no API keys are provided.
     """
-    if not settings.ANTHROPIC_API_KEY:
-        logger.warning("No ANTHROPIC_API_KEY provided; executing deterministic fallback risk evaluation.")
-        return _deterministic_risk_evaluation(shipment_data)
+    if settings.GEMINI_API_KEY:
+        try:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            from langchain_core.messages import SystemMessage, HumanMessage
 
-    try:
-        from langchain_anthropic import ChatAnthropic
-        from langchain_core.messages import SystemMessage, HumanMessage
+            llm = ChatGoogleGenerativeAI(
+                model="gemini-1.5-pro",
+                google_api_key=settings.GEMINI_API_KEY,
+                temperature=0.1,
+                max_output_tokens=1000
+            )
 
-        llm = ChatAnthropic(
-            model="claude-3-5-sonnet-20241022",
-            anthropic_api_key=settings.ANTHROPIC_API_KEY,
-            temperature=0.1,
-            max_tokens=1000
-        )
+            user_content = f"Analyze the following shipment for risks:\n{json.dumps(shipment_data, indent=2, default=str)}"
+            messages = [
+                SystemMessage(content=CLAUDE_RISK_DETECTOR_PROMPT),
+                HumanMessage(content=user_content)
+            ]
 
-        user_content = f"Analyze the following shipment for risks:\n{json.dumps(shipment_data, indent=2, default=str)}"
-        messages = [
-            SystemMessage(content=CLAUDE_RISK_DETECTOR_PROMPT),
-            HumanMessage(content=user_content)
-        ]
+            response = await llm.ainvoke(messages)
+            content_str = str(response.content).strip()
 
-        response = await llm.ainvoke(messages)
-        content_str = response.content.strip()
+            if "```json" in content_str:
+                content_str = content_str.split("```json")[1].split("```")[0].strip()
+            elif "```" in content_str:
+                content_str = content_str.split("```")[1].split("```")[0].strip()
 
-        # Parse JSON output from Claude
-        if "```json" in content_str:
-            content_str = content_str.split("```json")[1].split("```")[0].strip()
-        elif "```" in content_str:
-            content_str = content_str.split("```")[1].split("```")[0].strip()
+            return json.loads(content_str)
 
-        risk_json = json.loads(content_str)
-        return risk_json
+        except Exception as e:
+            logger.error(f"Gemini Risk Detector Agent call failed: {str(e)}; trying fallback.")
 
-    except Exception as e:
-        logger.error(f"Claude API evaluation failed: {str(e)}; utilizing rule fallback.")
-        return _deterministic_risk_evaluation(shipment_data)
+    if settings.ANTHROPIC_API_KEY:
+        try:
+            from langchain_anthropic import ChatAnthropic
+            from langchain_core.messages import SystemMessage, HumanMessage
+
+            llm = ChatAnthropic(
+                model="claude-3-5-sonnet-20241022",
+                anthropic_api_key=settings.ANTHROPIC_API_KEY,
+                temperature=0.1,
+                max_tokens=1000
+            )
+
+            user_content = f"Analyze the following shipment for risks:\n{json.dumps(shipment_data, indent=2, default=str)}"
+            messages = [
+                SystemMessage(content=CLAUDE_RISK_DETECTOR_PROMPT),
+                HumanMessage(content=user_content)
+            ]
+
+            response = await llm.ainvoke(messages)
+            content_str = str(response.content).strip()
+
+            if "```json" in content_str:
+                content_str = content_str.split("```json")[1].split("```")[0].strip()
+            elif "```" in content_str:
+                content_str = content_str.split("```")[1].split("```")[0].strip()
+
+            return json.loads(content_str)
+
+        except Exception as e:
+            logger.error(f"Claude Risk Detector Agent call failed: {str(e)}; utilizing rule fallback.")
+
+    logger.warning("No Gemini or Anthropic API key set; executing deterministic fallback risk evaluation.")
+    return _deterministic_risk_evaluation(shipment_data)
 
 def _deterministic_risk_evaluation(shipment_data: Dict[str, Any]) -> Dict[str, Any]:
     temp = shipment_data.get("temperature")
