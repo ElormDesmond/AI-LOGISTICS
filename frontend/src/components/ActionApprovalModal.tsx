@@ -49,8 +49,8 @@ export const ActionApprovalModal: React.FC<ActionApprovalModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="glass-panel w-full max-w-xl rounded-3xl border border-slate-700/80 shadow-2xl p-6 sm:p-8 relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200 overflow-y-auto">
+      <div className="glass-panel w-full max-w-xl rounded-3xl border border-slate-700/80 shadow-2xl p-6 sm:p-8 relative overflow-hidden my-auto max-h-[90vh] flex flex-col justify-between overflow-y-auto">
         {/* Glow backdrop */}
         <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
