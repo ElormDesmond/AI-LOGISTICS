@@ -43,10 +43,27 @@ def evaluate_shipment_async(self_or_id, shipment_id: int = None, db_session: Ses
             recommended_actions=actions,
             confidence=0.92
         )
+        from app.models.action import AgentActionCreate
+
         created_risk = crud.create_risk_assessment(db, risk_in)
 
         if temp_breach:
             shipment.status = "at_risk"
+            for act in actions:
+                action_in = AgentActionCreate(
+                    risk_assessment_id=created_risk.id,
+                    action_type=act.get("action_type", "REROUTE"),
+                    action_details={
+                        "tracking_id": shipment.tracking_id,
+                        "carrier": shipment.carrier,
+                        "origin": shipment.origin,
+                        "destination": shipment.destination
+                    },
+                    estimated_cost=act.get("estimated_cost", 450.0),
+                    expected_risk_reduction=6.5,
+                    status="pending_approval"
+                )
+                crud.create_agent_action(db, action_in)
             db.commit()
 
         logger.info(f"Completed risk evaluation for shipment_id={shipment_id}, risk_score={risk_score}")
