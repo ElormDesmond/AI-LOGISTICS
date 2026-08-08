@@ -8,9 +8,10 @@ import { ShipmentMap } from '../components/ShipmentMap';
 import { ActionQueue } from '../components/ActionQueue';
 import { RiskCard } from '../components/RiskCard';
 import { ClaimsPortalModal } from '../components/ClaimsPortalModal';
+import { ERPIntegrationModal } from '../components/ERPIntegrationModal';
 import { Shipment } from '../types/api';
 import { apiClient } from '../utils/api';
-import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check, Award } from 'lucide-react';
+import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check, Award, Database } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const { data: shipments = [], refetch: refetchShipments } = useShipments();
@@ -25,6 +26,7 @@ export const Dashboard: React.FC = () => {
   const [simulating, setSimulating] = useState(false);
   const [showRoleInfo, setShowRoleInfo] = useState(false);
   const [showClaimsPortal, setShowClaimsPortal] = useState(false);
+  const [showErpModal, setShowErpModal] = useState(false);
 
   // Compute key metrics
   const atRiskCount = shipments.filter(s => s.status === 'at_risk').length;
@@ -244,6 +246,16 @@ export const Dashboard: React.FC = () => {
             <span>Claims Portal</span>
           </button>
 
+          {/* ERP Systems Integration Button */}
+          <button
+            onClick={() => setShowErpModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/40 text-blue-300 text-xs font-mono font-bold transition active:scale-95 shadow-md shadow-blue-500/10"
+            title="Open Enterprise ERP Integration & Electronic Bill of Lading Engine"
+          >
+            <Database size={15} className="text-blue-400" />
+            <span>ERP Integration</span>
+          </button>
+
           {/* Refresh & Logout Buttons */}
           <button
             onClick={() => {
@@ -311,6 +323,11 @@ export const Dashboard: React.FC = () => {
       {/* Digital Cargo Claims Portal Modal */}
       {showClaimsPortal && (
         <ClaimsPortalModal onClose={() => setShowClaimsPortal(false)} />
+      )}
+
+      {/* Enterprise ERP Integration & Electronic Bill of Lading Modal */}
+      {showErpModal && (
+        <ERPIntegrationModal onClose={() => setShowErpModal(false)} shipmentId={activeSelected?.id || 1} />
       )}
     </div>
   );
