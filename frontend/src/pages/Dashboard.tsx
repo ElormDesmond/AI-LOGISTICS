@@ -8,7 +8,8 @@ import { ShipmentMap } from '../components/ShipmentMap';
 import { ActionQueue } from '../components/ActionQueue';
 import { RiskCard } from '../components/RiskCard';
 import { Shipment } from '../types/api';
-import { ShieldCheck, LogOut, Activity, Cpu, Radio, CheckCircle, RefreshCw } from 'lucide-react';
+import { apiClient } from '../utils/api';
+import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const { data: shipments = [], refetch: refetchShipments } = useShipments();
@@ -20,6 +21,8 @@ export const Dashboard: React.FC = () => {
 
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
+  const [simulating, setSimulating] = useState(false);
+  const [showRoleInfo, setShowRoleInfo] = useState(false);
 
   // Compute key metrics
   const atRiskCount = shipments.filter(s => s.status === 'at_risk').length;
@@ -43,6 +46,33 @@ export const Dashboard: React.FC = () => {
     showNotification(`Action #${actionId} rejected by operator.`);
     refetchActions();
     refetchShipments();
+  };
+
+  const handleSimulateExcursion = async () => {
+    setSimulating(true);
+    try {
+      const trackingId = `TRK-EXCURSION-${Math.floor(1000 + Math.random() * 9000)}`;
+      await apiClient.post('/shipments', {
+        tracking_id: trackingId,
+        origin: 'Frankfurt, Germany',
+        destination: 'Boston, USA',
+        carrier: 'DHL Express',
+        temperature: 18.5,
+        latitude: 50.1109,
+        longitude: 8.6821,
+        value_usd: 350000,
+        status: 'in_transit'
+      });
+      showNotification(`Simulated thermal breach ingested for ${trackingId}. AI Agent evaluating risk...`);
+      setTimeout(() => {
+        refetchShipments();
+        refetchActions();
+      }, 2500);
+    } catch (err) {
+      showNotification('Failed to trigger simulation. Ensure API container is active.');
+    } finally {
+      setSimulating(false);
+    }
   };
 
   return (
@@ -75,13 +105,55 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs font-mono text-slate-300">
-            <Radio size={14} className="text-emerald-400 animate-pulse" /> Live Telematics Active
-          </div>
+          {/* Simulation Trigger Button */}
+          <button
+            onClick={handleSimulateExcursion}
+            disabled={simulating}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-rose-600/20 to-amber-600/20 hover:from-rose-600/30 hover:to-amber-600/30 border border-rose-500/40 text-rose-300 text-xs font-mono font-bold transition shadow-lg shadow-rose-500/10 active:scale-95"
+            title="Simulate a cold-chain temperature excursion to test AI Agent evaluation and approval queue"
+          >
+            <Activity size={14} className={simulating ? 'animate-spin text-rose-400' : 'text-rose-400 animate-pulse'} />
+            <span>{simulating ? 'Ingesting Breach...' : 'Simulate Thermal Excursion'}</span>
+          </button>
 
-          <div className="text-right text-xs pr-2">
-            <p className="font-semibold text-slate-200">{user?.email || 'admin@pharma.com'}</p>
-            <p className="text-[10px] text-cyan-400 font-mono font-semibold uppercase tracking-wider">Role: {user?.role || 'ADMIN'}</p>
+          {/* User Role Card & Tooltip */}
+          <div className="relative">
+            <button
+              onClick={() => setShowRoleInfo(!showRoleInfo)}
+              className="text-right text-xs px-3 py-1.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition flex items-center gap-2"
+            >
+              <div>
+                <p className="font-semibold text-slate-200">{user?.email || 'admin@pharma.com'}</p>
+                <p className="text-[10px] text-cyan-400 font-mono font-semibold uppercase tracking-wider text-left">
+                  Role: {user?.role || 'ADMIN'} ℹ️
+                </p>
+              </div>
+            </button>
+
+            {/* Role Info Tooltip Modal */}
+            {showRoleInfo && (
+              <div className="absolute right-0 top-12 z-50 w-80 p-4 rounded-2xl bg-slate-900/95 border border-slate-800 shadow-2xl text-xs font-mono backdrop-blur-xl animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+                  <span className="font-bold text-white uppercase">{user?.role || 'ADMIN'} ACCESS CONTROL</span>
+                  <button onClick={() => setShowRoleInfo(false)} className="text-slate-400 hover:text-white">✕</button>
+                </div>
+                {(user?.role?.toUpperCase() === 'ADMIN' || !user?.role) && (
+                  <p className="text-slate-300 leading-relaxed">
+                    <strong className="text-cyan-400">Admin Authority:</strong> Can approve/reject high-cost carrier reroutes, trigger test breach simulations, configure rules, and view compliance logs.
+                  </p>
+                )}
+                {user?.role?.toUpperCase() === 'OPERATOR' && (
+                  <p className="text-slate-300 leading-relaxed">
+                    <strong className="text-amber-400">Operator Authority:</strong> Monitors live telematics grid, views breach alerts, and executes standard disruption mitigation proposals.
+                  </p>
+                )}
+                {user?.role?.toUpperCase() === 'AUDITOR' && (
+                  <p className="text-slate-300 leading-relaxed">
+                    <strong className="text-emerald-400">Auditor Authority:</strong> Read-only compliance access to immutable FDA 21 CFR Part 11 audit trails and AI timestamps.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <button

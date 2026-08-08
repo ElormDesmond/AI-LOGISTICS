@@ -110,6 +110,25 @@ export const Login: React.FC = () => {
                 </button>
               ))}
             </div>
+
+            {/* Role Permissions Description Box */}
+            <div className="mt-2.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[11px] font-mono text-slate-300">
+              {role === 'ADMIN' && (
+                <p>
+                  <strong className="text-cyan-400">ADMIN PERMISSIONS:</strong> Full system control. Can approve high-cost carrier reroutes, trigger breach simulations, and access compliance audit logs.
+                </p>
+              )}
+              {role === 'OPERATOR' && (
+                <p>
+                  <strong className="text-amber-400">OPERATOR PERMISSIONS:</strong> Operational controller. Monitors live telematics streams, temperature excursion alerts, and executes standard reroute proposals.
+                </p>
+              )}
+              {role === 'AUDITOR' && (
+                <p>
+                  <strong className="text-emerald-400">AUDITOR PERMISSIONS:</strong> Compliance authority. Read-only access to immutable FDA 21 CFR Part 11 audit logs and agent decision timestamps.
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Email Input */}
