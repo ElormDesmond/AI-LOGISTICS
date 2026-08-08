@@ -7,9 +7,10 @@ import { MetricsOverview } from '../components/MetricsOverview';
 import { ShipmentMap } from '../components/ShipmentMap';
 import { ActionQueue } from '../components/ActionQueue';
 import { RiskCard } from '../components/RiskCard';
+import { ClaimsPortalModal } from '../components/ClaimsPortalModal';
 import { Shipment } from '../types/api';
 import { apiClient } from '../utils/api';
-import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check } from 'lucide-react';
+import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check, Award } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const { data: shipments = [], refetch: refetchShipments } = useShipments();
@@ -23,6 +24,7 @@ export const Dashboard: React.FC = () => {
   const [notification, setNotification] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [showRoleInfo, setShowRoleInfo] = useState(false);
+  const [showClaimsPortal, setShowClaimsPortal] = useState(false);
 
   // Compute key metrics
   const atRiskCount = shipments.filter(s => s.status === 'at_risk').length;
@@ -232,6 +234,17 @@ export const Dashboard: React.FC = () => {
             )}
           </div>
 
+          {/* Claims Portal Button */}
+          <button
+            onClick={() => setShowClaimsPortal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold transition active:scale-95 shadow-md shadow-purple-500/10"
+            title="Open Digital Cargo Claims Portal & Loss Certificate Engine"
+          >
+            <Award size={15} className="text-purple-400" />
+            <span>Claims Portal</span>
+          </button>
+
+          {/* Refresh & Logout Buttons */}
           <button
             onClick={() => {
               refetchShipments();
@@ -294,6 +307,11 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Digital Cargo Claims Portal Modal */}
+      {showClaimsPortal && (
+        <ClaimsPortalModal onClose={() => setShowClaimsPortal(false)} />
+      )}
     </div>
   );
 };
