@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Shipment } from '../types/api';
-import { Navigation, Thermometer, MapPin, Search, Filter, Cpu, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Navigation, Thermometer, MapPin, Search, Cpu, CheckCircle2, ArrowRight, ShieldAlert, RefreshCw } from 'lucide-react';
 
 interface ShipmentMapProps {
   shipments: Shipment[];
@@ -20,29 +20,48 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
     switch (status) {
       case 'at_risk':
         return {
-          color: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+          color: 'bg-rose-500/20 text-rose-300 border-rose-500/40 glow-rose',
           dot: 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.8)] animate-pulse',
-          label: 'AT RISK'
+          label: 'CRITICAL BREACH'
+        };
+      case 'rerouted':
+        return {
+          color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+          dot: 'bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)]',
+          label: 'REROUTED'
         };
       case 'delayed':
         return {
-          color: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+          color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
           dot: 'bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.8)]',
           label: 'DELAYED'
         };
       case 'delivered':
         return {
-          color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+          color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
           dot: 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]',
           label: 'DELIVERED'
         };
       default:
         return {
-          color: 'bg-blue-500/20 text-cyan-400 border-blue-500/30',
+          color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
           dot: 'bg-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.8)]',
           label: 'IN TRANSIT'
         };
     }
+  };
+
+  const getStatusExplanation = (s: Shipment) => {
+    if (s.status === 'at_risk') {
+      return `CRITICAL EXCURSION: Temp reading (${s.temperature !== undefined ? `${s.temperature}°C` : 'N/A'}) exceeds safe cold-chain limit (-20°C). Requires immediate reroute.`;
+    }
+    if (s.status === 'rerouted') {
+      return `REROUTE IN PROGRESS: Re-booked priority express cold storage. Thermal chamber normalized to ${s.temperature !== undefined ? `${s.temperature}°C` : '-22.5°C'}.`;
+    }
+    if (s.status === 'delivered') {
+      return `DELIVERED: Chain of custody and GDP compliance certificates verified.`;
+    }
+    return `NOMINAL TELEMETRY: Operating safely at ${s.temperature !== undefined ? `${s.temperature}°C` : '-24.5°C'} with active thermal margin.`;
   };
 
   const filteredShipments = shipments.filter(s => {
@@ -67,23 +86,24 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
               Live Cold-Chain Telemetry Grid
             </h2>
             <p className="text-[11px] text-slate-400 font-mono">
-              PostGIS Geospatial Engine Active • 5s Pulse Interval
+              PostGIS Geospatial Engine Active • Real-time Status Tracking
             </p>
           </div>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 border border-slate-800 rounded-xl text-xs">
+        <div className="flex items-center gap-1 p-1 bg-slate-950/80 border border-slate-800 rounded-xl text-xs overflow-x-auto">
           {[
             { id: 'all', label: 'All' },
             { id: 'at_risk', label: 'Critical' },
+            { id: 'rerouted', label: 'Rerouted' },
             { id: 'in_transit', label: 'In Transit' },
             { id: 'delivered', label: 'Delivered' }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg font-mono text-[11px] transition ${
+              className={`px-2.5 py-1 rounded-lg font-mono text-[11px] transition whitespace-nowrap ${
                 filter === tab.id
                   ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-600/30'
                   : 'text-slate-400 hover:text-slate-200'
@@ -117,6 +137,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
             {filteredShipments.map((s) => {
               const isSelected = selectedShipment?.id === s.id;
               const badge = getStatusBadge(s.status);
+              const explanation = getStatusExplanation(s);
 
               return (
                 <div
@@ -128,12 +149,12 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
                       : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2.5">
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className={`w-2.5 h-2.5 rounded-full ${badge.dot}`}></span>
                       <span className="text-xs font-mono font-bold text-white tracking-wide">{s.tracking_id}</span>
                     </div>
-                    <span className={`px-2.5 py-0.5 text-[10px] font-mono font-extrabold rounded-full border ${badge.color}`}>
+                    <span className={`px-2 py-0.5 text-[10px] font-mono font-extrabold rounded-full border ${badge.color}`}>
                       {badge.label}
                     </span>
                   </div>
@@ -147,10 +168,15 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
 
                     <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px] font-mono">
                       <span className="text-slate-400">{s.carrier}</span>
-                      <span className={`font-bold ${s.temperature && s.temperature > -20 ? 'text-rose-400 font-extrabold' : 'text-cyan-400'}`}>
+                      <span className={`font-bold ${s.temperature && s.temperature > -20 ? 'text-rose-400 font-extrabold' : s.status === 'rerouted' ? 'text-purple-300' : 'text-cyan-400'}`}>
                         <Thermometer size={12} className="inline mr-1" />
                         {s.temperature !== undefined ? `${s.temperature}°C` : 'N/A'}
                       </span>
+                    </div>
+
+                    {/* Status Explanation Banner */}
+                    <div className="mt-2.5 p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-[10px] font-mono text-slate-300 leading-tight">
+                      {explanation}
                     </div>
                   </div>
                 </div>
@@ -160,7 +186,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
         ) : (
           <div className="h-full flex flex-col items-center justify-center p-8 text-center text-slate-500 text-xs font-mono relative z-10">
             <Cpu size={32} className="mb-2 text-slate-700 animate-pulse" />
-            <p>No shipments match current filter criteria.</p>
+            <p>No shipments match current status filter criteria.</p>
           </div>
         )}
       </div>

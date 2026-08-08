@@ -13,7 +13,7 @@ export interface Shipment {
   current_location?: Location;
   temperature?: number;
   humidity?: number;
-  status: 'in_transit' | 'delayed' | 'at_risk' | 'delivered';
+  status: 'in_transit' | 'delayed' | 'at_risk' | 'rerouted' | 'delivered';
   estimated_delivery: string;
   actual_delivery?: string;
   value_usd: number;
