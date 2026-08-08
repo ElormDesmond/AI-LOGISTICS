@@ -39,6 +39,20 @@ export const Login: React.FC = () => {
     }
   };
 
+  const handleRoleSelect = (selectedRole: 'ADMIN' | 'OPERATOR' | 'AUDITOR') => {
+    setRole(selectedRole);
+    if (selectedRole === 'ADMIN') {
+      setEmail('admin@pharma.com');
+      setPassword('SecurePassword123!');
+    } else if (selectedRole === 'OPERATOR') {
+      setEmail('operator@pharma.com');
+      setPassword('SecurePassword123!');
+    } else if (selectedRole === 'AUDITOR') {
+      setEmail('auditor@pharma.com');
+      setPassword('SecurePassword123!');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#070a12] text-slate-100 flex items-center justify-center p-4 relative overflow-hidden font-sans">
       {/* Dynamic Background Glow Orbs */}
@@ -85,7 +99,7 @@ export const Login: React.FC = () => {
                 <button
                   key={r}
                   type="button"
-                  onClick={() => setRole(r)}
+                  onClick={() => handleRoleSelect(r)}
                   className={`py-2 px-3 text-xs font-semibold rounded-xl transition-all ${
                     role === r
                       ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-bold'

@@ -12,9 +12,35 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+from app.security.password import hash_password
+
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+    seed_demo_users()
+
+def seed_demo_users():
+    from app.database.connection import SessionLocal
+    db = SessionLocal()
+    try:
+        demo_accounts = [
+            ("admin@pharma.com", "SecurePassword123!", "ADMIN"),
+            ("operator@pharma.com", "SecurePassword123!", "OPERATOR"),
+            ("auditor@pharma.com", "SecurePassword123!", "AUDITOR"),
+            ("operator@coldchain.com", "password123", "OPERATOR")
+        ]
+        for email, pwd, role in demo_accounts:
+            existing = db.query(models.User).filter(models.User.email == email).first()
+            if not existing:
+                hashed = hash_password(pwd)
+                user = models.User(email=email, password_hash=hashed, company_id=1, role=role)
+                db.add(user)
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+
 
 
 # Enable CORS for React frontend
