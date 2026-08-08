@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Shipment } from '../types/api';
-import { MapPin, Navigation, Thermometer, AlertCircle } from 'lucide-react';
+import { Navigation, Thermometer, MapPin, Search, Filter, Cpu, CheckCircle2, ArrowRight } from 'lucide-react';
 
 interface ShipmentMapProps {
   shipments: Shipment[];
@@ -13,72 +13,163 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
   selectedShipment,
   onSelectShipment,
 }) => {
-  const getStatusColor = (status: string) => {
+  const [filter, setFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'at_risk': return 'bg-rose-500 border-rose-300 text-rose-500 shadow-rose-500/50';
-      case 'delayed': return 'bg-amber-500 border-amber-300 text-amber-500 shadow-amber-500/50';
-      case 'delivered': return 'bg-emerald-500 border-emerald-300 text-emerald-500 shadow-emerald-500/50';
-      default: return 'bg-blue-500 border-blue-300 text-blue-500 shadow-blue-500/50';
+      case 'at_risk':
+        return {
+          color: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+          dot: 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.8)] animate-pulse',
+          label: 'AT RISK'
+        };
+      case 'delayed':
+        return {
+          color: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+          dot: 'bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.8)]',
+          label: 'DELAYED'
+        };
+      case 'delivered':
+        return {
+          color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+          dot: 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]',
+          label: 'DELIVERED'
+        };
+      default:
+        return {
+          color: 'bg-blue-500/20 text-cyan-400 border-blue-500/30',
+          dot: 'bg-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.8)]',
+          label: 'IN TRANSIT'
+        };
     }
   };
 
+  const filteredShipments = shipments.filter(s => {
+    const matchesFilter = filter === 'all' || s.status === filter;
+    const matchesSearch = s.tracking_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          s.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          s.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          s.carrier.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
   return (
-    <div className="glass-panel rounded-2xl p-5 border border-slate-800 h-full flex flex-col relative overflow-hidden">
-      {/* Map Header */}
-      <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800 z-10">
-        <div className="flex items-center gap-2">
-          <Navigation className="text-blue-400" size={18} />
-          <h3 className="text-md font-bold text-white">Live Cold-Chain Telemetry Map</h3>
+    <div className="glass-card rounded-2xl p-6 border border-slate-800 h-full flex flex-col relative overflow-hidden">
+      {/* Map Header & Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-slate-800/80 gap-3 z-10">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-xl">
+            <Navigation size={20} />
+          </div>
+          <div>
+            <h2 className="font-display text-lg font-bold text-white tracking-tight">
+              Live Cold-Chain Telemetry Grid
+            </h2>
+            <p className="text-[11px] text-slate-400 font-mono">
+              PostGIS Geospatial Engine Active • 5s Pulse Interval
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-3 text-xs font-mono">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Critical</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Delayed</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Normal</span>
+
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 border border-slate-800 rounded-xl text-xs">
+          {[
+            { id: 'all', label: 'All' },
+            { id: 'at_risk', label: 'Critical' },
+            { id: 'in_transit', label: 'In Transit' },
+            { id: 'delivered', label: 'Delivered' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setFilter(tab.id)}
+              className={`px-3 py-1.5 rounded-lg font-mono text-[11px] transition ${
+                filter === tab.id
+                  ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-600/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Visual Simulation World Grid Container */}
-      <div className="flex-1 bg-slate-950/90 rounded-xl border border-slate-800/80 relative p-4 flex flex-col justify-between overflow-hidden">
-        {/* Decorative Grid Lines */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30"></div>
+      {/* Search Input Bar */}
+      <div className="mb-4 relative z-10">
+        <Search className="absolute left-3.5 top-3 text-slate-500" size={16} />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by Tracking ID, Origin, Destination, or Carrier..."
+          className="w-full bg-slate-950/90 border border-slate-800/80 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 transition font-sans"
+        />
+      </div>
 
-        {/* Global Nodes */}
-        <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 my-auto">
-          {shipments.map((s) => {
-            const isSelected = selectedShipment?.id === s.id;
-            return (
-              <div
-                key={s.id}
-                onClick={() => onSelectShipment(s)}
-                className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-blue-950/50 border-blue-500 ring-2 ring-blue-500/20 scale-[1.02]'
-                    : 'bg-slate-900/90 border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-3 h-3 rounded-full border shadow-lg ${getStatusColor(s.status)}`}></span>
-                    <span className="text-xs font-mono font-bold text-white">{s.tracking_id}</span>
+      {/* Grid Container */}
+      <div className="flex-1 bg-slate-950/60 rounded-xl border border-slate-800/80 relative p-4 overflow-y-auto max-h-[460px]">
+        {/* Subtle Map Grid Backdrop */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-20 pointer-events-none"></div>
+
+        {filteredShipments.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 relative z-10">
+            {filteredShipments.map((s) => {
+              const isSelected = selectedShipment?.id === s.id;
+              const badge = getStatusBadge(s.status);
+
+              return (
+                <div
+                  key={s.id}
+                  onClick={() => onSelectShipment(s)}
+                  className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden ${
+                    isSelected
+                      ? 'bg-gradient-to-br from-blue-950/80 to-slate-900 border-cyan-500/80 ring-2 ring-cyan-500/30 shadow-lg shadow-cyan-500/10 scale-[1.01]'
+                      : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${badge.dot}`}></span>
+                      <span className="text-xs font-mono font-bold text-white tracking-wide">{s.tracking_id}</span>
+                    </div>
+                    <span className={`px-2.5 py-0.5 text-[10px] font-mono font-extrabold rounded-full border ${badge.color}`}>
+                      {badge.label}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 uppercase">{s.carrier}</span>
-                </div>
 
-                <div className="mt-2 text-[11px] text-slate-300 flex justify-between items-center">
-                  <span>{s.origin} → {s.destination}</span>
-                  <span className={`font-mono font-bold ${s.temperature && s.temperature > -20 ? 'text-rose-400' : 'text-cyan-400'}`}>
-                    {s.temperature !== undefined ? `${s.temperature}°C` : 'N/A'}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  <div className="text-xs text-slate-300 space-y-1.5">
+                    <div className="flex items-center justify-between text-slate-400 text-[11px]">
+                      <span className="flex items-center gap-1"><MapPin size={12} className="text-cyan-400" /> {s.origin}</span>
+                      <ArrowRight size={12} className="text-slate-600" />
+                      <span>{s.destination}</span>
+                    </div>
 
-        <div className="relative z-10 text-[11px] text-slate-500 font-mono flex justify-between items-center pt-2">
-          <span>PostGIS Telemetry Feed Active</span>
-          <span>5-Second Auto Refresh</span>
-        </div>
+                    <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px] font-mono">
+                      <span className="text-slate-400">{s.carrier}</span>
+                      <span className={`font-bold ${s.temperature && s.temperature > -20 ? 'text-rose-400 font-extrabold' : 'text-cyan-400'}`}>
+                        <Thermometer size={12} className="inline mr-1" />
+                        {s.temperature !== undefined ? `${s.temperature}°C` : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center p-8 text-center text-slate-500 text-xs font-mono relative z-10">
+            <Cpu size={32} className="mb-2 text-slate-700 animate-pulse" />
+            <p>No shipments match current filter criteria.</p>
+          </div>
+        )}
+      </div>
+
+      <div className="pt-3 mt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono z-10">
+        <span className="flex items-center gap-1.5 text-emerald-400">
+          <CheckCircle2 size={13} /> Encrypted Telemetry Stream
+        </span>
+        <span>Showing {filteredShipments.length} of {shipments.length} Active Feeds</span>
       </div>
     </div>
   );
