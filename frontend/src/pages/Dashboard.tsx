@@ -9,6 +9,7 @@ import { ActionQueue } from '../components/ActionQueue';
 import { RiskCard } from '../components/RiskCard';
 import { ClaimsPortalModal } from '../components/ClaimsPortalModal';
 import { ERPIntegrationModal } from '../components/ERPIntegrationModal';
+import { AcousticAlarmBanner } from '../components/AcousticAlarmBanner';
 import { Shipment } from '../types/api';
 import { apiClient } from '../utils/api';
 import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check, Award, Database } from 'lucide-react';
@@ -278,6 +279,13 @@ export const Dashboard: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* Real-Time Acoustic Excursion Siren & Web Push Alarm Banner */}
+      <AcousticAlarmBanner
+        hasActiveExcursion={!!shipments.find(s => s.temperature !== undefined && s.temperature > -20.0)}
+        excursionTrackingId={shipments.find(s => s.temperature !== undefined && s.temperature > -20.0)?.tracking_id}
+        excursionTemp={shipments.find(s => s.temperature !== undefined && s.temperature > -20.0)?.temperature}
+      />
 
       {/* Metrics Overview Bar */}
       <MetricsOverview
