@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: supply_chain_api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/supply_chain
+      - REDIS_URL=redis://redis:6379/0
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-dev_secret_key_change_in_prod_12345}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-gAAAAABmX_1234567890abcdefghijklmnopqrstuvwxyz=}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./app:/app/app
+
+  db:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: supply_chain_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=supply_chain
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: supply_chain_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  celery_worker:
+    build: .
+    container_name: supply_chain_celery
+    command: celery -A app.tasks.worker worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/supply_chain
+      - REDIS_URL=redis://redis:6379/0
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./app:/app/app
+
+volumes:
+  postgres_data:
+  redis_data:
