@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../utils/api';
-import { X, ShieldCheck, DollarSign, FileText, Award, CheckCircle2, Download, Printer, Cpu, FileCheck } from 'lucide-react';
+import { X, ShieldCheck, DollarSign, FileText, Award, CheckCircle2, Download, Printer, Cpu, FileCheck, ArrowLeft } from 'lucide-react';
 
 interface ClaimsPortalModalProps {
   onClose: () => void;
@@ -55,9 +55,10 @@ export const ClaimsPortalModal: React.FC<ClaimsPortalModalProps> = ({ onClose })
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-1 text-xs font-bold"
           >
             <X size={18} />
+            <span>Close</span>
           </button>
         </div>
 
@@ -120,7 +121,7 @@ export const ClaimsPortalModal: React.FC<ClaimsPortalModalProps> = ({ onClose })
 
                   <button
                     onClick={() => handleViewCertificate(claim.claim_id)}
-                    className="px-3.5 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 text-xs font-bold transition flex items-center gap-1.5 active:scale-95"
+                    className="px-3.5 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-md shadow-purple-500/10"
                   >
                     <FileCheck size={14} />
                     <span>View Loss Certificate</span>
@@ -131,46 +132,73 @@ export const ClaimsPortalModal: React.FC<ClaimsPortalModalProps> = ({ onClose })
           )}
         </div>
 
-        {/* Certificate View Modal Popup */}
+        {/* High-Z-Index Loss Certificate Viewer Popup Modal */}
         {selectedCertificate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-6 text-slate-100 shadow-2xl relative">
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
-                <span className="font-bold text-purple-400 text-xs tracking-wider">GDP COMPLIANCE LOSS CERTIFICATE</span>
-                <button onClick={() => setSelectedCertificate(null)} className="text-slate-400 hover:text-white">✕</button>
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-4 overflow-y-auto">
+            <div className="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-3xl w-full p-6 sm:p-8 text-slate-100 shadow-2xl relative max-h-[92vh] flex flex-col justify-between overflow-y-auto my-auto animate-in fade-in zoom-in-95 duration-200">
+              {/* Certificate Top Header */}
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800 shrink-0">
+                <div className="flex items-center gap-2">
+                  <FileCheck size={20} className="text-purple-400" />
+                  <span className="font-bold text-white text-sm tracking-wide font-mono">OFFICIAL GDP PHARMACEUTICAL LOSS CERTIFICATE</span>
+                </div>
+                <button
+                  onClick={() => setSelectedCertificate(null)}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center gap-1.5 font-bold text-xs transition"
+                >
+                  <ArrowLeft size={14} />
+                  <span>Back to Claims</span>
+                </button>
               </div>
 
-              <div className="space-y-4 text-xs font-mono">
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-center">
-                  <h2 className="font-bold text-white text-base tracking-wide">{selectedCertificate.certificate_title}</h2>
-                  <p className="text-[11px] text-slate-400 mt-1">{selectedCertificate.certificate_id}</p>
-                  <p className="text-[10px] text-emerald-400 mt-1">Authority: {selectedCertificate.compliance_authority}</p>
+              {/* Certificate Content Body */}
+              <div className="space-y-4 text-xs font-mono flex-1 overflow-y-auto pr-1">
+                <div className="p-5 rounded-2xl bg-slate-950 border border-purple-500/30 text-center shadow-lg">
+                  <Award size={32} className="mx-auto mb-2 text-purple-400 animate-pulse" />
+                  <h2 className="font-bold text-white text-base sm:text-lg tracking-wide">{selectedCertificate.certificate_title}</h2>
+                  <p className="text-xs text-purple-300 mt-1 font-bold">{selectedCertificate.certificate_id}</p>
+                  <p className="text-[11px] text-emerald-400 mt-1">Authority: {selectedCertificate.compliance_authority}</p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                  <p><strong>Claim ID:</strong> {selectedCertificate.claim_details?.claim_id}</p>
-                  <p><strong>Tracking ID:</strong> {selectedCertificate.claim_details?.tracking_id}</p>
-                  <p><strong>Underwriter:</strong> {selectedCertificate.claim_details?.underwriter}</p>
-                  <p><strong>Excursion Temperature:</strong> {selectedCertificate.claim_details?.excursion_temp_c}°C</p>
-                  <p><strong>Certified Net Indemnity Payout:</strong> <span className="text-emerald-400 font-extrabold">${selectedCertificate.claim_details?.net_payout_usd?.toLocaleString()}</span></p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-[11px]">
+                    <p className="text-slate-400">Claim File ID: <strong className="text-white">{selectedCertificate.claim_details?.claim_id}</strong></p>
+                    <p className="text-slate-400">Cargo Tracking ID: <strong className="text-white">{selectedCertificate.claim_details?.tracking_id}</strong></p>
+                    <p className="text-slate-400">Underwriter: <strong className="text-white">{selectedCertificate.claim_details?.underwriter}</strong></p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-[11px]">
+                    <p className="text-slate-400">Thermal Excursion Peak: <strong className="text-rose-400 font-bold">{selectedCertificate.claim_details?.excursion_temp_c}°C</strong></p>
+                    <p className="text-slate-400">Calculated MKT: <strong className="text-amber-400 font-bold">{selectedCertificate.claim_details?.mkt_calculated_c}°C</strong></p>
+                    <p className="text-slate-400">Certified Indemnity Payout: <strong className="text-emerald-400 font-bold text-sm">${selectedCertificate.claim_details?.net_payout_usd?.toLocaleString()}</strong></p>
+                  </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/30 text-[11px] text-slate-300 leading-relaxed font-sans">
-                  <strong>Legal Compliance Declaration:</strong> {selectedCertificate.legal_declaration}
+                <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/30 text-[11px] text-slate-300 leading-relaxed font-sans shadow-md">
+                  <strong className="text-purple-300 block mb-1">Legal Underwriter Compliance Declaration:</strong>
+                  {selectedCertificate.legal_declaration}
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[10px] text-slate-400 flex items-center justify-between font-mono">
-                  <span>Digital Hash: {selectedCertificate.digital_signature_hash}</span>
-                  <span className="text-emerald-400 font-bold">✓ Cryptographically Signed</span>
+                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-mono">
+                  <span className="truncate">Digital Signature Hash: <strong className="text-slate-200">{selectedCertificate.digital_signature_hash}</strong></span>
+                  <span className="text-emerald-400 font-bold shrink-0">✓ Cryptographically Signed & Verified</span>
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-slate-800 flex justify-end gap-3">
+              {/* Certificate Bottom Actions Bar */}
+              <div className="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                <button
+                  onClick={() => setSelectedCertificate(null)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition border border-slate-700"
+                >
+                  <ArrowLeft size={14} /> Close Certificate View
+                </button>
+
                 <button
                   onClick={() => alert("Loss Certificate PDF downloaded to local audit archive.")}
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition shadow-lg shadow-purple-600/25 active:scale-95"
                 >
-                  <Download size={14} /> Download PDF Certificate
+                  <Download size={15} /> Download PDF Loss Certificate
                 </button>
               </div>
             </div>
