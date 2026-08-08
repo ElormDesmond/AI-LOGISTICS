@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AgentAction } from '../types/api';
+import { MultiAgentPanel } from './MultiAgentPanel';
 import { X, CheckCircle2, XCircle, TrendingDown, DollarSign, ShieldCheck, Activity, Info, ArrowRight } from 'lucide-react';
 
 interface ActionApprovalModalProps {
@@ -103,6 +104,9 @@ export const ActionApprovalModal: React.FC<ActionApprovalModalProps> = ({
             </p>
           </div>
         </div>
+
+        {/* Multi-Agent Autonomous Negotiation Transcript & MKT Stability Panel */}
+        <MultiAgentPanel actionId={action.id} />
 
         {/* Expected Action Outcome Preview Box */}
         <div className="mb-5 p-3.5 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 text-xs font-mono text-cyan-200">

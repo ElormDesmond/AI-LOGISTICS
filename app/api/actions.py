@@ -38,6 +38,34 @@ def list_action_history_endpoint(
         .order_by(AgentAction.id.desc())\
         .all()
 
+@router.get("/{action_id}/multi-agent-negotiation")
+def get_multi_agent_negotiation_endpoint(
+    action_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get multi-agent autonomous negotiation transcript & consensus details.
+    Collates QualityAssuranceAgent, CarrierNegotiationAgent, and ClaimsRiskAgent outputs.
+    """
+    action = db.query(AgentAction).filter(AgentAction.id == action_id).first()
+    if not action:
+        raise HTTPException(status_code=404, detail=f"Action id={action_id} not found")
+    
+    risk = db.query(RiskAssessment).filter(RiskAssessment.id == action.risk_assessment_id).first()
+    shipment = db.query(Shipment).filter(Shipment.id == risk.shipment_id).first() if risk else None
+
+    from app.services.agents.orchestrator import orchestrator
+    return orchestrator.run_multi_agent_collaboration(
+        tracking_id=shipment.tracking_id if shipment else f"TRK-{action_id}",
+        carrier=shipment.carrier if shipment else "DHL Express",
+        origin=shipment.origin if shipment else "Frankfurt, Germany",
+        destination=shipment.destination if shipment else "Boston, USA",
+        temperature=shipment.temperature if (shipment and shipment.temperature) else 18.5,
+        value_usd=shipment.value_usd if (shipment and shipment.value_usd) else 350000.0,
+        risk_score=risk.risk_score if risk else 8.5
+    )
+
 @router.post("/{action_id}/approve", response_model=AgentActionRead)
 def approve_action_endpoint(
     action_id: int,
