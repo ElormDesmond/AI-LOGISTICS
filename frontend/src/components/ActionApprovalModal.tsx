@@ -50,89 +50,88 @@ export const ActionApprovalModal: React.FC<ActionApprovalModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200 overflow-y-auto">
-      <div className="glass-panel w-full max-w-xl rounded-3xl border border-slate-700/80 shadow-2xl p-6 sm:p-8 relative overflow-hidden my-auto max-h-[90vh] flex flex-col justify-between overflow-y-auto">
-        {/* Glow backdrop */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <div className="glass-panel w-full max-w-2xl rounded-3xl border border-slate-700/80 shadow-2xl p-6 sm:p-7 relative overflow-hidden max-h-[88vh] flex flex-col justify-between">
+        {/* Ambient Glow Backdrop */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        {/* Modal Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+        {/* Fixed Modal Header */}
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80 shrink-0 z-10">
           <div className="flex items-center gap-3">
             <span className={`px-3 py-1 text-xs font-mono font-extrabold rounded-full border ${getBadgeStyle(action.action_type)}`}>
               {action.action_type}
             </span>
             <div>
               <h3 className="font-display text-lg font-bold text-white tracking-tight">
-                Agent Proposal Verification
+                Agent Proposal Verification & Execution
               </h3>
-              <p className="text-[11px] text-slate-400 font-mono">Action #{action.id} • Pending Human Approval</p>
+              <p className="text-[11px] text-slate-400 font-mono">Action #{action.id} • Pending Human Verification</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Tradeoff Cards with Plain-Language Explanations */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-5">
-          <div className="bg-slate-900/90 border border-slate-800/90 p-4 rounded-2xl">
-            <div className="flex items-center justify-between">
+        {/* Scrollable Modal Content Body */}
+        <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs font-mono relative z-10">
+          {/* Tradeoff Cards with Plain-Language Explanations */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl">
               <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
                 <DollarSign size={14} className="text-emerald-400" /> Total Reroute Cost
               </span>
+              <p className="font-display text-2xl font-extrabold text-white mt-1 font-mono">${action.estimated_cost}</p>
+              <p className="text-[11px] text-slate-300 mt-1.5 leading-relaxed font-sans">
+                <strong>Cost Breakdown:</strong> $300 express priority thermal flight slot + $150 GDP warehouse transfer fee.
+              </p>
             </div>
-            <p className="font-display text-2xl font-extrabold text-white mt-1.5 font-mono">${action.estimated_cost}</p>
-            <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">
-              <strong>Cost Breakdown:</strong> $300 express priority thermal flight slot + $150 GDP warehouse transfer fee.
-            </p>
-          </div>
 
-          <div className="bg-slate-900/90 border border-slate-800/90 p-4 rounded-2xl">
-            <div className="flex items-center justify-between">
+            <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl">
               <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
                 <TrendingDown size={14} className="text-emerald-400" /> Expected Risk Reduction
               </span>
+              <p className="font-display text-2xl font-extrabold text-emerald-400 mt-1 font-mono">
+                -{action.expected_risk_reduction} pts
+              </p>
+              <p className="text-[11px] text-slate-300 mt-1.5 leading-relaxed font-sans">
+                <strong>Yield Result:</strong> Drops risk score from 8.5 → 2.0. Protects $350,000 cargo from total thermal spoilage.
+              </p>
             </div>
-            <p className="font-display text-2xl font-extrabold text-emerald-400 mt-1.5 font-mono">
-              -{action.expected_risk_reduction} pts
+          </div>
+
+          {/* Multi-Agent Autonomous Negotiation Transcript & MKT Stability Panel */}
+          <MultiAgentPanel actionId={action.id} />
+
+          {/* Expected Action Outcome Preview Box */}
+          <div className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 text-xs font-mono text-cyan-200">
+            <div className="flex items-center gap-1.5 font-bold mb-1.5 text-cyan-300">
+              <Info size={15} /> Expected Action Execution Outcome:
+            </div>
+            <p className="text-[11px] leading-relaxed text-slate-300 font-sans">
+              Approving this action will instruct carrier <strong>{action.action_details?.carrier || 'DHL Express'}</strong> to transfer package <strong>{action.action_details?.tracking_id}</strong> to a priority temperature-controlled flight with active nitrogen cooling (-22.5°C).
             </p>
-            <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">
-              <strong>Yield Result:</strong> Drops risk score from 8.5 → 2.0. Protects $350,000 cargo from total thermal spoilage.
-            </p>
+          </div>
+
+          {/* Compliance Notes Input */}
+          <div className="pb-1">
+            <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2 font-mono flex items-center gap-1.5">
+              <ShieldCheck size={14} className="text-cyan-400" /> Compliance Audit Sign-Off Notes (Optional)
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add quality control sign-off notes for FDA compliance audit log..."
+              className="w-full bg-slate-950/90 border border-slate-800 rounded-2xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition resize-none h-16 font-sans"
+            />
           </div>
         </div>
 
-        {/* Multi-Agent Autonomous Negotiation Transcript & MKT Stability Panel */}
-        <MultiAgentPanel actionId={action.id} />
-
-        {/* Expected Action Outcome Preview Box */}
-        <div className="mb-5 p-3.5 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 text-xs font-mono text-cyan-200">
-          <div className="flex items-center gap-1.5 font-bold mb-1 text-cyan-300">
-            <Info size={14} /> Expected Action Outcome:
-          </div>
-          <p className="text-[11px] leading-relaxed text-slate-300">
-            Approving this action will instruct carrier <strong>{action.action_details?.carrier || 'DHL'}</strong> to transfer package <strong>{action.action_details?.tracking_id}</strong> to a priority temperature-controlled flight with active nitrogen cooling (-22.5°C).
-          </p>
-        </div>
-
-        {/* Compliance Notes Input */}
-        <div className="mb-6">
-          <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2 font-mono flex items-center gap-1.5">
-            <ShieldCheck size={14} className="text-cyan-400" /> Compliance Audit Sign-Off Notes (Optional)
-          </label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add quality control sign-off notes for FDA compliance audit log..."
-            className="w-full bg-slate-950/90 border border-slate-800 rounded-2xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition resize-none h-16 font-sans"
-          />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3">
+        {/* Fixed Action Footer Buttons */}
+        <div className="flex gap-3 pt-4 mt-3 border-t border-slate-800/80 shrink-0 z-10">
           <button
             onClick={handleApprove}
             disabled={submitting}
