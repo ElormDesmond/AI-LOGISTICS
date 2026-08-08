@@ -4,7 +4,7 @@ services:
     container_name: supply_chain_api
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
       - ENVIRONMENT=development
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/supply_chain
@@ -27,7 +27,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=supply_chain
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -35,7 +35,7 @@ services:
     image: redis:7-alpine
     container_name: supply_chain_redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
 
