@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shipment, RiskAssessment } from '../types/api';
+import { ThermalDecayChart } from './ThermalDecayChart';
 import { Thermometer, ShieldAlert, Cpu, CheckCircle2, MapPin, Truck, Calendar } from 'lucide-react';
 
 interface RiskCardProps {
@@ -72,6 +73,9 @@ export const RiskCard: React.FC<RiskCardProps> = ({ shipment, risk }) => {
             Select a shipment on the map or list to view AI diagnosis.
           </div>
         )}
+
+        {/* Thermal Decay & Weather Analytics Chart */}
+        <ThermalDecayChart shipmentId={shipment.id} />
       </div>
 
       <div className="pt-4 border-t border-slate-800 text-[11px] text-slate-400 flex justify-between font-mono">

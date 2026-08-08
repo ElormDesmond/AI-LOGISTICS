@@ -65,13 +65,14 @@ def metrics():
     """Prometheus metrics scrape endpoint."""
     return get_prometheus_metrics_response()
 
-from app.api import shipments, risks, auth, actions, audit_log
+from app.api import shipments, risks, auth, actions, audit_log, weather
 
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(shipments.router, prefix=settings.API_V1_STR)
 app.include_router(risks.router, prefix=settings.API_V1_STR)
 app.include_router(actions.router, prefix=settings.API_V1_STR)
 app.include_router(audit_log.router, prefix=settings.API_V1_STR)
+app.include_router(weather.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
