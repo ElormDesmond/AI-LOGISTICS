@@ -9,7 +9,7 @@ import { ActionQueue } from '../components/ActionQueue';
 import { RiskCard } from '../components/RiskCard';
 import { Shipment } from '../types/api';
 import { apiClient } from '../utils/api';
-import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw } from 'lucide-react';
+import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const { data: shipments = [], refetch: refetchShipments } = useShipments();
@@ -75,6 +75,33 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  const handleSimulateNormal = async () => {
+    setSimulating(true);
+    try {
+      const trackingId = `TRK-SAFE-${Math.floor(1000 + Math.random() * 9000)}`;
+      await apiClient.post('/shipments', {
+        tracking_id: trackingId,
+        origin: 'Zurich, Switzerland',
+        destination: 'New York, USA',
+        carrier: 'FedEx Priority Alert',
+        temperature: -24.5,
+        current_location: { lat: 47.3769, lng: 8.5417 },
+        value_usd: 500000,
+        status: 'in_transit',
+        estimated_delivery: new Date(Date.now() + 86400000 * 3).toISOString()
+      });
+      showNotification(`Safe shipment ${trackingId} ingested (-24.5°C). Normal on-course status, zero actions required.`);
+      setTimeout(() => {
+        refetchShipments();
+        refetchActions();
+      }, 2500);
+    } catch (err) {
+      showNotification('Failed to trigger normal simulation.');
+    } finally {
+      setSimulating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#070a12] text-slate-100 p-4 sm:p-6 flex flex-col font-sans relative overflow-hidden">
       {/* Toast Notification Banner */}
@@ -104,17 +131,29 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Simulation Trigger Button */}
-          <button
-            onClick={handleSimulateExcursion}
-            disabled={simulating}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-rose-600/20 to-amber-600/20 hover:from-rose-600/30 hover:to-amber-600/30 border border-rose-500/40 text-rose-300 text-xs font-mono font-bold transition shadow-lg shadow-rose-500/10 active:scale-95"
-            title="Simulate a cold-chain temperature excursion to test AI Agent evaluation and approval queue"
-          >
-            <Activity size={14} className={simulating ? 'animate-spin text-rose-400' : 'text-rose-400 animate-pulse'} />
-            <span>{simulating ? 'Ingesting Breach...' : 'Simulate Thermal Excursion'}</span>
-          </button>
+        <div className="flex items-center gap-2.5">
+          {/* Simulation Trigger Buttons */}
+          <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-1 rounded-2xl">
+            <button
+              onClick={handleSimulateNormal}
+              disabled={simulating}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold transition active:scale-95"
+              title="Simulate a safe cold-chain shipment on course (-24.5°C) requiring zero actions"
+            >
+              <Check size={13} className="text-cyan-400" />
+              <span>+ Normal (-24.5°C)</span>
+            </button>
+
+            <button
+              onClick={handleSimulateExcursion}
+              disabled={simulating}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 text-xs font-mono font-bold transition active:scale-95 shadow-md shadow-rose-500/10"
+              title="Simulate a thermal breach (+18.5°C) to generate a pending action in the approval queue"
+            >
+              <Activity size={13} className={simulating ? 'animate-spin text-rose-400' : 'text-rose-400 animate-pulse'} />
+              <span>+ Excursion (+18.5°C)</span>
+            </button>
+          </div>
 
           {/* User Role Card & Tooltip */}
           <div className="relative">

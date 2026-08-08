@@ -13,7 +13,7 @@ class AgentActionCreate(AgentActionBase):
     status: str = Field(default="pending_approval")
 
 class AgentActionApprove(BaseModel):
-    user_id: int
+    user_id: Optional[int] = None
     notes: Optional[str] = None
 
 class AgentActionRead(AgentActionBase):
