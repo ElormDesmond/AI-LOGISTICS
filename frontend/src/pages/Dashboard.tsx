@@ -11,9 +11,10 @@ import { ClaimsPortalModal } from '../components/ClaimsPortalModal';
 import { ERPIntegrationModal } from '../components/ERPIntegrationModal';
 import { AcousticAlarmBanner } from '../components/AcousticAlarmBanner';
 import { PWAInstallBanner } from '../components/PWAInstallBanner';
+import { ComplianceAuditModal } from '../components/ComplianceAuditModal';
 import { Shipment } from '../types/api';
 import { apiClient } from '../utils/api';
-import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check, Award, Database } from 'lucide-react';
+import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check, Award, Database, FileText } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const { data: shipments = [], refetch: refetchShipments } = useShipments();
@@ -29,6 +30,7 @@ export const Dashboard: React.FC = () => {
   const [showRoleInfo, setShowRoleInfo] = useState(false);
   const [showClaimsPortal, setShowClaimsPortal] = useState(false);
   const [showErpModal, setShowErpModal] = useState(false);
+  const [showAuditModal, setShowAuditModal] = useState(false);
 
   // Compute key metrics
   const atRiskCount = shipments.filter(s => s.status === 'at_risk').length;
@@ -261,6 +263,16 @@ export const Dashboard: React.FC = () => {
             <span>ERP Integration</span>
           </button>
 
+          {/* FDA Compliance Audit Binder Button */}
+          <button
+            onClick={() => setShowAuditModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold transition active:scale-95 shadow-md shadow-emerald-500/10"
+            title="Open FDA 21 CFR Part 11 Compliance Audit Binder Engine"
+          >
+            <FileText size={15} className="text-emerald-400" />
+            <span>Audit Binder</span>
+          </button>
+
           {/* Refresh & Logout Buttons */}
           <button
             onClick={() => {
@@ -340,6 +352,11 @@ export const Dashboard: React.FC = () => {
       {/* Enterprise ERP Integration & Electronic Bill of Lading Modal */}
       {showErpModal && (
         <ERPIntegrationModal onClose={() => setShowErpModal(false)} shipmentId={activeSelected?.id || 1} />
+      )}
+
+      {/* FDA 21 CFR Part 11 Annual Compliance Audit Binder Modal */}
+      {showAuditModal && (
+        <ComplianceAuditModal onClose={() => setShowAuditModal(false)} />
       )}
     </div>
   );
