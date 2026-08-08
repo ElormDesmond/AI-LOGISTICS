@@ -12,11 +12,14 @@ import { ERPIntegrationModal } from '../components/ERPIntegrationModal';
 import { AcousticAlarmBanner } from '../components/AcousticAlarmBanner';
 import { PWAInstallBanner } from '../components/PWAInstallBanner';
 import { ComplianceAuditModal } from '../components/ComplianceAuditModal';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { useI18n } from '../i18n/i18nContext';
 import { Shipment } from '../types/api';
 import { apiClient } from '../utils/api';
 import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check, Award, Database, FileText } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
+  const { t } = useI18n();
   const { data: shipments = [], refetch: refetchShipments } = useShipments();
   const { data: risks = [] } = useRisks();
   const { data: pendingActions = [], refetch: refetchActions } = usePendingActions();
@@ -242,6 +245,9 @@ export const Dashboard: React.FC = () => {
 
           {/* Mobile PWA Install & Offline Sync Status Banner */}
           <PWAInstallBanner />
+
+          {/* Multi-Language GDP Locale Switcher */}
+          <LanguageSwitcher />
 
           {/* Claims Portal Button */}
           <button
