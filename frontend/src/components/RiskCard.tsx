@@ -58,7 +58,7 @@ export const RiskCard: React.FC<RiskCardProps> = ({ shipment, risk }) => {
         {risk ? (
           <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <ShieldAlert size={14} className="text-amber-400" /> Claude Reasoning Engine
+              <ShieldAlert size={14} className="text-amber-400" /> Agentic AI Reasoning Engine
             </p>
             <p className="text-xs text-slate-300 leading-relaxed font-sans">{risk.reasoning}</p>
 
