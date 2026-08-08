@@ -10,6 +10,7 @@ import { RiskCard } from '../components/RiskCard';
 import { ClaimsPortalModal } from '../components/ClaimsPortalModal';
 import { ERPIntegrationModal } from '../components/ERPIntegrationModal';
 import { AcousticAlarmBanner } from '../components/AcousticAlarmBanner';
+import { PWAInstallBanner } from '../components/PWAInstallBanner';
 import { Shipment } from '../types/api';
 import { apiClient } from '../utils/api';
 import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check, Award, Database } from 'lucide-react';
@@ -236,6 +237,9 @@ export const Dashboard: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Mobile PWA Install & Offline Sync Status Banner */}
+          <PWAInstallBanner />
 
           {/* Claims Portal Button */}
           <button
