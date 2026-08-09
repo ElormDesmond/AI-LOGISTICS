@@ -4,7 +4,7 @@ from typing import List, Optional
 from app.config import settings
 from app.database.connection import get_db
 from app.database import crud
-from app.models.shipment import ShipmentCreate, ShipmentRead
+from app.models.shipment import ShipmentCreate, ShipmentRead, IoTTelemetryIngest
 from app.tasks.evaluation import evaluate_shipment_async
 
 router = APIRouter(prefix="/shipments", tags=["Shipments"])
@@ -76,4 +76,43 @@ def get_shipment_endpoint(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Shipment id={shipment_id} not found."
         )
+    return shipment
+
+@router.post("/{tracking_id}/telemetry", response_model=ShipmentRead)
+def ingest_iot_telemetry_endpoint(
+    tracking_id: str,
+    telemetry: IoTTelemetryIngest,
+    db: Session = Depends(get_db)
+):
+    """
+    IoT Sensor Telemetry Ingestion Endpoint.
+    Receives real-time temperature, GPS, and humidity readings from hardware trackers
+    (e.g., Sensitech, Tive, Roambee, ESP32, or Cellular IoT gateways).
+    
+    Automatically evaluates thermal threshold breaches and triggers Agentic AI risk mitigation.
+    """
+    shipment = crud.get_shipment_by_tracking_id(db, tracking_id=tracking_id)
+    if not shipment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Shipment with tracking_id '{tracking_id}' not found."
+        )
+
+    # Update shipment sensor telemetry
+    shipment.temperature = telemetry.temperature
+    if telemetry.humidity is not None:
+        shipment.humidity = telemetry.humidity
+    if telemetry.lat is not None and telemetry.lng is not None:
+        shipment.current_location = {"lat": telemetry.lat, "lng": telemetry.lng}
+
+    # Detect thermal breach (+18.5°C or > -20.0°C)
+    if telemetry.temperature > -20.0 and shipment.status != "rerouted":
+        shipment.status = "at_risk"
+
+    db.commit()
+    db.refresh(shipment)
+
+    # Trigger AI agent risk evaluation & action proposal generator
+    evaluate_shipment_async(shipment.id, db_session=db)
+
     return shipment

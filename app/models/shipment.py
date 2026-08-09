@@ -31,6 +31,14 @@ class ShipmentBase(BaseModel):
 class ShipmentCreate(ShipmentBase):
     company_id: int = Field(default=1, description="Company ID for multi-tenant isolation")
 
+class IoTTelemetryIngest(BaseModel):
+    temperature: float = Field(..., description="Sensor temperature in °C")
+    lat: Optional[float] = Field(None, ge=-90.0, le=90.0, description="Latitude")
+    lng: Optional[float] = Field(None, ge=-180.0, le=180.0, description="Longitude")
+    humidity: Optional[float] = Field(None, ge=0.0, le=100.0, description="Humidity %")
+    battery_pct: Optional[float] = Field(None, ge=0.0, le=100.0, description="Sensor battery level %")
+    device_id: Optional[str] = Field(None, description="Hardware serial / MAC address of IoT sensor")
+
 class ShipmentRead(ShipmentBase):
     id: int
     company_id: int
