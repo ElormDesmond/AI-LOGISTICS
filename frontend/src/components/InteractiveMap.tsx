@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Tooltip } from 'react-leaflet';
+import React from 'react';
+import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Shipment } from '../types/api';
-import { Thermometer, ShieldAlert, Navigation, ArrowRight, CheckCircle2, AlertTriangle, Route } from 'lucide-react';
+import { useI18n } from '../i18n/i18nContext';
+import { Thermometer, AlertTriangle, Route } from 'lucide-react';
 
 // Fix default Leaflet icon assets
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -45,6 +46,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   selectedShipment,
   onSelectShipment,
 }) => {
+  const { t } = useI18n();
   const mapCenter: [number, number] = [35.0, -15.0];
 
   const getMarkerColor = (status: string, temp?: number) => {
@@ -139,7 +141,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                   >
                     <Tooltip permanent direction="top" className="custom-reroute-tooltip">
                       <span className="text-[10px] font-mono font-bold text-emerald-400">
-                        ⚡ Active Reroute Path ➔ Frankfurt Cold Storage Hub
+                        ⚡ {t('popup_active_reroute')} ➔ Frankfurt Cold Storage Hub
                       </span>
                     </Tooltip>
                   </Polyline>
@@ -178,8 +180,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                       {/* Multi-Shipment Location Badge Header */}
                       {count > 1 && (
                         <div className="mb-2 px-2 py-1 bg-blue-500/20 border border-blue-500/40 rounded-lg text-[10px] font-mono text-cyan-300 flex items-center justify-between font-bold">
-                          <span>📍 Location Cluster ({count} Shipments)</span>
-                          <span className="text-slate-400"># {index + 1} of {count}</span>
+                          <span>📍 {t('popup_location_cluster')} ({count})</span>
+                          <span className="text-slate-400"># {index + 1} / {count}</span>
                         </div>
                       )}
 
@@ -191,21 +193,21 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                       </div>
 
                       <div className="space-y-1.5 text-[11px] text-slate-300 font-sans">
-                        <p><strong>Carrier:</strong> {s.carrier}</p>
-                        <p><strong>Route:</strong> {s.origin} ➔ {s.destination}</p>
+                        <p><strong>{t('carrier')}:</strong> {s.carrier}</p>
+                        <p><strong>{t('popup_route')}:</strong> {s.origin} ➔ {s.destination}</p>
                         <p className="flex items-center gap-1 font-mono font-bold" style={{ color }}>
-                          <Thermometer size={13} /> Telemetry Temp: {s.temperature !== undefined ? `${s.temperature}°C` : 'N/A'}
+                          <Thermometer size={13} /> {t('popup_telemetry_temp')}: {s.temperature !== undefined ? `${s.temperature}°C` : 'N/A'}
                         </p>
 
                         {/* Exact Excursion Failure Breakdown */}
                         {s.status === 'at_risk' && (
                           <div className="p-2 mt-1.5 rounded-lg bg-rose-950/40 border border-rose-500/40 text-[10px] font-mono text-rose-200 leading-tight">
                             <div className="flex items-center gap-1 font-bold text-rose-300 mb-1">
-                              <AlertTriangle size={12} /> Failure Point Breakdown:
+                              <AlertTriangle size={12} /> {t('popup_failure_breakdown')}:
                             </div>
-                            <p><strong>Location:</strong> Lat {lat.toFixed(2)}°N, Lng {lng.toFixed(2)}°E</p>
-                            <p><strong>Cause:</strong> Tarmac transfer heatwave (+36.5°C ambient) loading delay.</p>
-                            <p className="mt-1 text-emerald-400"><strong>Nearest Hub:</strong> Frankfurt Cargo Center (2.4 km)</p>
+                            <p><strong>{t('location')}:</strong> Lat {lat.toFixed(2)}°N, Lng {lng.toFixed(2)}°E</p>
+                            <p><strong>{t('popup_cause')}:</strong> Tarmac transfer heatwave (+36.5°C ambient) loading delay.</p>
+                            <p className="mt-1 text-emerald-400"><strong>{t('popup_nearest_hub')}:</strong> Frankfurt Cargo Center (2.4 km)</p>
                           </div>
                         )}
 
@@ -213,7 +215,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                         {s.status === 'rerouted' && (
                           <div className="p-2 mt-1.5 rounded-lg bg-purple-950/40 border border-purple-500/40 text-[10px] font-mono text-purple-200 leading-tight">
                             <div className="flex items-center gap-1 font-bold text-purple-300 mb-1">
-                              <Route size={12} /> Active Reroute Path:
+                              <Route size={12} /> {t('popup_active_reroute')}:
                             </div>
                             <p>Cargo diverted to Frankfurt GDP Cold-Storage Terminal.</p>
                             <p className="text-emerald-300">Thermal reading normalized to -22.5°C.</p>
@@ -224,7 +226,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                       {/* Other Shipments in this Cluster List */}
                       {count > 1 && (
                         <div className="mt-2.5 pt-2 border-t border-slate-800">
-                          <p className="text-[10px] font-mono text-slate-400 mb-1 font-bold">Other shipments at this hub:</p>
+                          <p className="text-[10px] font-mono text-slate-400 mb-1 font-bold">{t('popup_other_shipments')}:</p>
                           <div className="space-y-1">
                             {group.filter(other => other.id !== s.id).map(other => (
                               <button

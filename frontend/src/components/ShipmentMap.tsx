@@ -56,16 +56,17 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
   };
 
   const getStatusExplanation = (s: Shipment) => {
+    const tempStr = s.temperature !== undefined ? `${s.temperature}` : '-24.5';
     if (s.status === 'at_risk') {
-      return `CRITICAL EXCURSION: Temp reading (${s.temperature !== undefined ? `${s.temperature}°C` : 'N/A'}) exceeds safe limit (-20°C). Tarmac transfer heatwave (+36.5°C). Nearest GDP Hub: Frankfurt Airport (2.4 km).`;
+      return t('status_exp_at_risk').replace('{temp}', tempStr);
     }
     if (s.status === 'rerouted') {
-      return `REROUTE IN PROGRESS: Re-booked priority express cold storage. Thermal chamber normalized to ${s.temperature !== undefined ? `${s.temperature}°C` : '-22.5°C'}. Next Step: Monitor arrival at secondary hub.`;
+      return t('status_exp_rerouted').replace('{temp}', tempStr);
     }
     if (s.status === 'delivered') {
-      return `DELIVERED: Received & GDP compliance verified. Next Step: Batch release quality sign-off & ERP inventory release.`;
+      return t('status_exp_delivered');
     }
-    return `NOMINAL TELEMETRY: Operating safely at ${s.temperature !== undefined ? `${s.temperature}°C` : '-24.5°C'} with active thermal margin. Next Step: Scheduled transit & automated polling.`;
+    return t('status_exp_nominal').replace('{temp}', tempStr);
   };
 
   const filteredShipments = shipments.filter(s => {

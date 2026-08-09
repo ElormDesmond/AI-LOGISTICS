@@ -68,7 +68,19 @@ export const translations: Record<Language, Record<string, string>> = {
     saved: "Saved",
     approve_reroute_btn: "Approve & Execute Reroute",
     reject_proposal_btn: "Reject Proposal",
-    audit_notes_label: "Compliance Audit Sign-Off Notes (Optional)"
+    audit_notes_label: "Compliance Audit Sign-Off Notes (Optional)",
+    status_exp_at_risk: "CRITICAL EXCURSION: Temp reading ({temp}°C) exceeds safe limit (-20°C). Tarmac transfer heatwave (+36.5°C). Nearest GDP Hub: Frankfurt Airport (2.4 km).",
+    status_exp_rerouted: "REROUTE IN PROGRESS: Re-booked priority express cold storage. Thermal chamber normalized to {temp}°C. Next Step: Monitor arrival at secondary hub.",
+    status_exp_delivered: "DELIVERED: Received & GDP compliance verified. Next Step: Batch release quality sign-off & ERP inventory release.",
+    status_exp_nominal: "NOMINAL TELEMETRY: Operating safely at {temp}°C with active thermal margin. Next Step: Scheduled transit & automated polling.",
+    popup_location_cluster: "Location Cluster",
+    popup_route: "Route",
+    popup_telemetry_temp: "Telemetry Temp",
+    popup_failure_breakdown: "Failure Point Breakdown",
+    popup_cause: "Cause",
+    popup_nearest_hub: "Nearest Hub",
+    popup_active_reroute: "Active Reroute Path",
+    popup_other_shipments: "Other shipments at this hub"
   },
   de: {
     app_title: "PharmaShield AI",
@@ -137,7 +149,19 @@ export const translations: Record<Language, Record<string, string>> = {
     saved: "Eingespart",
     approve_reroute_btn: "Umleitung Ausführen & Ausführen",
     reject_proposal_btn: "Vorschlag Ablehnen",
-    audit_notes_label: "Konformitäts-Audit Freigabenotiz (Optional)"
+    audit_notes_label: "Konformitäts-Audit Freigabenotiz (Optional)",
+    status_exp_at_risk: "KRITISCHE ABWEICHUNG: Temperaturmessung ({temp}°C) überschreitet Grenzwert (-20°C). Hitzewelle beim Rollfeldtransfer (+36.5°C). Nächstes GDP-Zentrum: Flughafen Frankfurt (2.4 km).",
+    status_exp_rerouted: "UMLEITUNG LÄUFT: Express-Kühllager neu gebucht. Kühlkammer auf {temp}°C normalisiert. Nächster Schritt: Überwachung der Ankunft am Sekundärknotenpunkt.",
+    status_exp_delivered: "GELIEFERT: Empfangen & GDP-Konformität verifiziert. Nächster Schritt: Qualitätsfreigabe & ERP-Bestandsfreigabe.",
+    status_exp_nominal: "NOMINALE TELEMETRIE: Sicherer Betrieb bei {temp}°C mit aktiver thermischer Reserve. Nächster Schritt: Geplanter Transit & automatische Abfrage.",
+    popup_location_cluster: "Standort-Cluster",
+    popup_route: "Route",
+    popup_telemetry_temp: "Telemetrie-Temperatur",
+    popup_failure_breakdown: "Aufschlüsselung der Ausfallstelle",
+    popup_cause: "Ursache",
+    popup_nearest_hub: "Nächstes GDP-Zentrum",
+    popup_active_reroute: "Aktiver Umleitungspfad",
+    popup_other_shipments: "Weitere Sendungen an diesem Knotenpunkt"
   },
   fr: {
     app_title: "PharmaShield AI",
@@ -206,7 +230,19 @@ export const translations: Record<Language, Record<string, string>> = {
     saved: "Économisé",
     approve_reroute_btn: "Approuver et Exécuter le Déroutement",
     reject_proposal_btn: "Rejeter la Proposition",
-    audit_notes_label: "Notes d'Approbation de l'Audit (Optionnel)"
+    audit_notes_label: "Notes d'Approbation de l'Audit (Optionnel)",
+    status_exp_at_risk: "EXCURSION CRITIQUE: La température ({temp}°C) dépasse la limite de sécurité (-20°C). Vague de chaleur sur le tarmac (+36.5°C). Centre BPD le plus proche: Aéroport de Francfort (2.4 km).",
+    status_exp_rerouted: "DÉROUTEMENT EN COURS: Stockage frigorifique express réinvesti. Chambre thermique normalisée à {temp}°C. Prochaine étape: Surveillance de l'arrivée au hub secondaire.",
+    status_exp_delivered: "LIVRÉ: Reçu et conformité BPD vérifiée. Prochaine étape: Libération du lot qualité et mise à disposition dans l'ERP.",
+    status_exp_nominal: "TÉLÉMÉTRIE NOMINALE: Fonctionnement sécurisé à {temp}°C avec marge thermique active. Prochaine étape: Transit programmé et sondage automatisé.",
+    popup_location_cluster: "Cluster d'Emplacements",
+    popup_route: "Itinéraire",
+    popup_telemetry_temp: "Température Télémétrique",
+    popup_failure_breakdown: "Analyse du Point de Défaillance",
+    popup_cause: "Cause",
+    popup_nearest_hub: "Centre BPD le Plus Proche",
+    popup_active_reroute: "Voie de Déroutement Active",
+    popup_other_shipments: "Autres expéditions sur ce hub"
   },
   ja: {
     app_title: "PharmaShield AI",
@@ -275,7 +311,19 @@ export const translations: Record<Language, Record<string, string>> = {
     saved: "削減額",
     approve_reroute_btn: "迂回指示を承認・実行",
     reject_proposal_btn: "提案を拒否",
-    audit_notes_label: "監査承認メモ (任意)"
+    audit_notes_label: "監査承認メモ (任意)",
+    status_exp_at_risk: "重大な逸脱: 温度計測値 ({temp}°C) が安全限界 (-20°C) を超えています。滑走路での移送中の猛暑 (+36.5°C)。最寄りのGDPハブ: フランクフルト空港 (2.4 km)。",
+    status_exp_rerouted: "迂回進行中: 優先特急冷凍保管庫を再手配。保冷チャンバーが {temp}°C に正常化。次のステップ: セカンダリハブへの到着を監視。",
+    status_exp_delivered: "配送完了: 受領およびGDP適合性が確認されました。次のステップ: 出荷品質承認およびERP在庫解放。",
+    status_exp_nominal: "正常テレメトリ: アクティブな保冷マージンを持って {temp}°C で安全に稼働中。次のステップ: 定期輸送および自動ポーリング。",
+    popup_location_cluster: "位置クラスタ",
+    popup_route: "ルート",
+    popup_telemetry_temp: "テレメトリ温度",
+    popup_failure_breakdown: "障がい発生ポイント分析",
+    popup_cause: "原因",
+    popup_nearest_hub: "最寄りGDPハブ",
+    popup_active_reroute: "アクティブ迂回パス",
+    popup_other_shipments: "このハブにある他の貨物"
   },
   es: {
     app_title: "PharmaShield AI",
@@ -344,6 +392,18 @@ export const translations: Record<Language, Record<string, string>> = {
     saved: "Ahorrado",
     approve_reroute_btn: "Aprobar y Ejecutar Desvío",
     reject_proposal_btn: "Rechazar Propuesta",
-    audit_notes_label: "Notas de Firma de Auditoría (Opcional)"
+    audit_notes_label: "Notas de Firma de Auditoría (Opcional)",
+    status_exp_at_risk: "EXCURSIÓN CRÍTICA: Lectura de temp ({temp}°C) supera el límite (-20°C). Ola de calor en pista (+36.5°C). Centro BPD más cercano: Aeropuerto de Fráncfort (2.4 km).",
+    status_exp_rerouted: "DESVÍO EN PROCESO: Almacén frigorífico exprés reservado. Cámara térmica normalizada a {temp}°C. Siguiente paso: Monitorear llegada a centro secundario.",
+    status_exp_delivered: "ENTREGADO: Recibido y conformidad BPD verificada. Siguiente paso: Firma de calidad para liberación de lote y disponibilidad ERP.",
+    status_exp_nominal: "TELEMETRÍA NOMINAL: Funcionando de manera segura a {temp}°C con margen térmico activo. Siguiente paso: Tránsito programado y sondeo automático.",
+    popup_location_cluster: "Clúster de Ubicación",
+    popup_route: "Ruta",
+    popup_telemetry_temp: "Temperatura de Telemetría",
+    popup_failure_breakdown: "Desglose de Punto de Fallo",
+    popup_cause: "Causa",
+    popup_nearest_hub: "Centro BPD Más Cercano",
+    popup_active_reroute: "Ruta de Desvío Activa",
+    popup_other_shipments: "Otros envíos en este centro"
   }
 };
