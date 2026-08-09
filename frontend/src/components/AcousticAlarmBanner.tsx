@@ -51,8 +51,11 @@ export const AcousticAlarmBanner: React.FC<AcousticAlarmBannerProps> = ({
 
       // Trigger Desktop Web Push Notification
       if ('Notification' in window && Notification.permission === 'granted') {
+        const bodyText = t('alarm_notification_body')
+          .replace('{tracking_id}', excursionTrackingId || '')
+          .replace('{temp}', `${excursionTemp}`);
         new Notification(`🚨 ${t('critical_alarm_title')}: ${excursionTrackingId}`, {
-          body: `Shipment ${excursionTrackingId} reached +${excursionTemp}°C. Action approval required.`,
+          body: bodyText,
           icon: '/favicon.ico'
         });
       }
@@ -60,6 +63,10 @@ export const AcousticAlarmBanner: React.FC<AcousticAlarmBannerProps> = ({
   }, [hasActiveExcursion, excursionTrackingId, excursionTemp, muted, t]);
 
   if (!hasActiveExcursion) return null;
+
+  const descText = t('critical_alarm_desc')
+    .replace('{tracking_id}', excursionTrackingId || '')
+    .replace('{temp}', `${excursionTemp}`);
 
   return (
     <div className="w-full bg-rose-500/20 border border-rose-500/50 p-3 rounded-2xl mb-4 text-xs font-mono text-rose-200 flex items-center justify-between shadow-lg shadow-rose-500/10 animate-pulse">
@@ -72,7 +79,7 @@ export const AcousticAlarmBanner: React.FC<AcousticAlarmBannerProps> = ({
             {t('critical_alarm_title')}
           </strong>
           <span className="text-rose-300 text-[11px]">
-            Shipment <strong>{excursionTrackingId}</strong> breached thermal threshold at +{excursionTemp}°C.
+            {descText}
           </span>
         </div>
       </div>

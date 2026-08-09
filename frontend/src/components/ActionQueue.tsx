@@ -101,10 +101,10 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
 
                   <div className="flex items-center justify-between text-xs my-2.5 pt-2 border-t border-slate-800/60 font-mono">
                     <span className="text-slate-400 flex items-center gap-1">
-                      <DollarSign size={13} className="text-slate-500" /> Cost: <strong className="text-white">${action.estimated_cost}</strong>
+                      <DollarSign size={13} className="text-slate-500" /> {t('cost_label')}: <strong className="text-white">${action.estimated_cost}</strong>
                     </span>
                     <span className="text-emerald-400 font-bold flex items-center gap-1">
-                      <TrendingDown size={13} /> Risk -{action.expected_risk_reduction} pts
+                      <TrendingDown size={13} /> {t('risk_reduction_pts').replace('{pts}', `${action.expected_risk_reduction}`)}
                     </span>
                   </div>
 
@@ -126,15 +126,16 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
         actionHistory.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-500 relative z-10 font-mono text-xs">
             <History size={28} className="mb-2 text-slate-700 animate-pulse" />
-            <p>No historical approved reroutes found.</p>
+            <p>{t('no_history_actions')}</p>
           </div>
         ) : (
           <div className="space-y-3 overflow-y-auto max-h-[380px] pr-1 relative z-10">
             {actionHistory.map((action) => {
               const confCode = action.result?.confirmation_code || `CONF-${action.id}`;
-              const notes = action.result?.notes || 'Approved by operator';
+              const notes = action.result?.notes || t('approved_by_operator');
               const isApproved = action.status === 'approved' || action.status === 'executed';
               const trackingId = action.action_details?.tracking_id || `Shipment #${action.id}`;
+              const approvedByText = t('approved_by_user').replace('{id}', `${action.user_approved_by || 1}`);
 
               return (
                 <div
@@ -157,7 +158,7 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
 
                   <div className="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] text-slate-300 space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Approved By: User #{action.user_approved_by || 1}</span>
+                      <span className="text-slate-400">{approvedByText}</span>
                       <span className="text-slate-400">${action.estimated_cost}</span>
                     </div>
                     {notes && <p className="text-slate-400 italic">"{notes}"</p>}

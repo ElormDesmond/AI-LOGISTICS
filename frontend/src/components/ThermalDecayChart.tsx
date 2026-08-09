@@ -85,8 +85,8 @@ export const ThermalDecayChart: React.FC<ThermalDecayChartProps> = ({ shipmentId
       {/* 12-Hour Thermal Projection Curve Bars */}
       <div>
         <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1.5 font-bold">
-          <span>Forward Hour-by-Hour Package Temp Projection (°C):</span>
-          <span className="text-rose-400">Safety Threshold: -20.0°C</span>
+          <span>{t('forward_hourly_projection')}</span>
+          <span className="text-rose-400">{t('safety_threshold_label')}</span>
         </div>
 
         <div className="grid grid-cols-6 gap-1.5">

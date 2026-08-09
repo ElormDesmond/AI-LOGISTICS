@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { AgentAction } from '../types/api';
 import { MultiAgentPanel } from './MultiAgentPanel';
-import { X, CheckCircle2, XCircle, TrendingDown, DollarSign, ShieldCheck, Activity, Info, ArrowRight } from 'lucide-react';
+import { useI18n } from '../i18n/i18nContext';
+import { X, CheckCircle2, XCircle, TrendingDown, DollarSign, ShieldCheck, Activity, Info } from 'lucide-react';
 
 interface ActionApprovalModalProps {
   action: AgentAction;
@@ -16,6 +17,7 @@ export const ActionApprovalModal: React.FC<ActionApprovalModalProps> = ({
   onApprove,
   onReject,
 }) => {
+  const { t } = useI18n();
   const [submitting, setSubmitting] = useState(false);
   const [notes, setNotes] = useState('');
 
@@ -48,6 +50,10 @@ export const ActionApprovalModal: React.FC<ActionApprovalModalProps> = ({
       default: return 'bg-slate-800 text-slate-300 border-slate-700';
     }
   };
+
+  const outcomeDesc = t('expected_outcome_desc')
+    .replace('{carrier}', action.action_details?.carrier || 'DHL Express')
+    .replace('{tracking_id}', action.action_details?.tracking_id || `TRK-${action.id}`);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
@@ -82,23 +88,23 @@ export const ActionApprovalModal: React.FC<ActionApprovalModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl">
               <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                <DollarSign size={13} className="text-emerald-400" /> Total Reroute Cost
+                <DollarSign size={13} className="text-emerald-400" /> {t('total_reroute_cost')}
               </span>
               <p className="font-display text-xl font-extrabold text-white mt-1 font-mono">${action.estimated_cost}</p>
               <p className="text-[10px] text-slate-300 mt-1 leading-relaxed font-sans">
-                <strong>Cost Breakdown:</strong> $300 express priority thermal flight slot + $150 GDP warehouse transfer fee.
+                {t('cost_breakdown_label')}
               </p>
             </div>
 
             <div className="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl">
               <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                <TrendingDown size={13} className="text-emerald-400" /> Expected Risk Reduction
+                <TrendingDown size={13} className="text-emerald-400" /> {t('expected_risk_reduction_label')}
               </span>
               <p className="font-display text-xl font-extrabold text-emerald-400 mt-1 font-mono">
                 -{action.expected_risk_reduction} pts
               </p>
               <p className="text-[10px] text-slate-300 mt-1 leading-relaxed font-sans">
-                <strong>Yield Result:</strong> Drops risk score from 8.5 → 2.0. Protects $350,000 cargo from total thermal spoilage.
+                {t('yield_result_label')}
               </p>
             </div>
           </div>
@@ -109,22 +115,22 @@ export const ActionApprovalModal: React.FC<ActionApprovalModalProps> = ({
           {/* Expected Action Outcome Preview Box */}
           <div className="p-3 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 text-xs font-mono text-cyan-200">
             <div className="flex items-center gap-1.5 font-bold mb-1 text-cyan-300">
-              <Info size={14} /> Expected Action Execution Outcome:
+              <Info size={14} /> {t('expected_outcome_title')}
             </div>
             <p className="text-[11px] leading-relaxed text-slate-300 font-sans">
-              Approving this action will instruct carrier <strong>{action.action_details?.carrier || 'DHL Express'}</strong> to transfer package <strong>{action.action_details?.tracking_id}</strong> to a priority temperature-controlled flight with active nitrogen cooling (-22.5°C).
+              {outcomeDesc}
             </p>
           </div>
 
           {/* Compliance Notes Input */}
           <div className="pb-1">
             <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 font-mono flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-cyan-400" /> Compliance Audit Sign-Off Notes (Optional)
+              <ShieldCheck size={14} className="text-cyan-400" /> {t('audit_notes_label')}
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add quality control sign-off notes for FDA compliance audit log..."
+              placeholder={t('notes_placeholder')}
               className="w-full bg-slate-950/90 border border-slate-800 rounded-2xl p-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition resize-none h-14 font-sans"
             />
           </div>
