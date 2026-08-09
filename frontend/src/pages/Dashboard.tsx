@@ -16,7 +16,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useI18n } from '../i18n/i18nContext';
 import { Shipment } from '../types/api';
 import { apiClient } from '../utils/api';
-import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, PlusCircle, Check, Award, Database, FileText } from 'lucide-react';
+import { ShieldCheck, LogOut, Activity, Cpu, CheckCircle, RefreshCw, Check, Award, Database, FileText, ChevronDown, Download, FileCheck } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const { t } = useI18n();
@@ -34,11 +34,14 @@ export const Dashboard: React.FC = () => {
   const [showClaimsPortal, setShowClaimsPortal] = useState(false);
   const [showErpModal, setShowErpModal] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showLegalDocsMenu, setShowLegalDocsMenu] = useState(false);
 
-  // Compute key metrics
+  // Compute key metrics & critical excursion alignment
   const atRiskCount = shipments.filter(s => s.status === 'at_risk').length;
   const activeSelected = selectedShipment || shipments[0] || null;
   const activeRisk = activeSelected ? risks.find(r => r.shipment_id === activeSelected.id) : undefined;
+  
+  const excursionShipment = shipments.find(s => s.status === 'at_risk' || (s.temperature !== undefined && s.temperature > -20.0));
 
   const showNotification = (msg: string) => {
     setNotification(msg);
@@ -140,6 +143,13 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  const handleDownloadPdfCertificate = () => {
+    showNotification("Generating official FDA 21 CFR Part 11 & EU GDP Compliance Certificate PDF...");
+    setTimeout(() => {
+      window.open('/api/v1/audit/export-pdf', '_blank');
+    }, 1000);
+  };
+
   return (
     <div className="min-h-screen bg-[#070a12] text-slate-100 p-4 sm:p-6 flex flex-col font-sans relative overflow-hidden">
       {/* Toast Notification Banner */}
@@ -151,25 +161,25 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* Top Navbar Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 mb-6 border-b border-slate-800/80 gap-4">
+      <header className="flex flex-col lg:flex-row lg:items-center justify-between pb-5 mb-6 border-b border-slate-800/80 gap-4">
         <div className="flex items-center gap-3.5">
           <div className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/10 border border-blue-500/30 text-cyan-400 rounded-2xl shadow-lg shadow-blue-500/10">
             <ShieldCheck size={28} />
           </div>
           <div>
             <h1 className="font-display text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-              PharmaShield <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">AI</span>
+              {t('app_title')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">AI</span>
               <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-full uppercase tracking-wide">
-                v1.0 Operational
+                {t('status_operational')}
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
-              Autonomous Cold-Chain Disruption Management & Human-in-the-Loop Control Center
+              {t('sub_title')}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Simulation Trigger Buttons */}
           <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-1 rounded-2xl">
             <button
@@ -179,7 +189,7 @@ export const Dashboard: React.FC = () => {
               title="Simulate a safe cold-chain shipment on course (-24.5°C) requiring zero actions"
             >
               <Check size={12} className="text-cyan-400" />
-              <span>+ Normal</span>
+              <span>{t('btn_normal')}</span>
             </button>
 
             <button
@@ -189,7 +199,7 @@ export const Dashboard: React.FC = () => {
               title="Simulate a thermal breach (+18.5°C) to generate a pending action in the approval queue"
             >
               <Activity size={12} className={simulating ? 'animate-spin text-rose-400' : 'text-rose-400 animate-pulse'} />
-              <span>+ Excursion</span>
+              <span>{t('btn_excursion')}</span>
             </button>
 
             <button
@@ -199,7 +209,7 @@ export const Dashboard: React.FC = () => {
               title="Simulate a completed delivered shipment with verified GDP chain of custody"
             >
               <CheckCircle size={12} className="text-emerald-400" />
-              <span>+ Delivered</span>
+              <span>{t('btn_delivered')}</span>
             </button>
           </div>
 
@@ -212,7 +222,7 @@ export const Dashboard: React.FC = () => {
               <div>
                 <p className="font-semibold text-slate-200">{user?.email || 'admin@pharma.com'}</p>
                 <p className="text-[10px] text-cyan-400 font-mono font-semibold uppercase tracking-wider text-left">
-                  Role: {user?.role || 'ADMIN'} ℹ️
+                  {t('role')}: {user?.role || 'ADMIN'} ℹ️
                 </p>
               </div>
             </button>
@@ -249,35 +259,101 @@ export const Dashboard: React.FC = () => {
           {/* Multi-Language GDP Locale Switcher */}
           <LanguageSwitcher />
 
-          {/* Claims Portal Button */}
-          <button
-            onClick={() => setShowClaimsPortal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold transition active:scale-95 shadow-md shadow-purple-500/10"
-            title="Open Digital Cargo Claims Portal & Loss Certificate Engine"
-          >
-            <Award size={15} className="text-purple-400" />
-            <span>Claims Portal</span>
-          </button>
+          {/* Executive Certificates & Legal Documents Dropdown Button */}
+          <div className="relative">
+            <button
+              onClick={() => setShowLegalDocsMenu(!showLegalDocsMenu)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-cyan-600/20 hover:from-blue-600/30 hover:to-cyan-600/30 border border-blue-500/40 text-blue-200 text-xs font-mono font-bold transition active:scale-95 shadow-lg shadow-blue-500/10"
+              title="Access all regulatory certificates, digital insurance loss claims, electronic bills of lading, and FDA audit binders"
+            >
+              <FileCheck size={16} className="text-cyan-400" />
+              <span>{t('btn_legal_docs')}</span>
+              <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${showLegalDocsMenu ? 'rotate-180' : ''}`} />
+            </button>
 
-          {/* ERP Systems Integration Button */}
-          <button
-            onClick={() => setShowErpModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/40 text-blue-300 text-xs font-mono font-bold transition active:scale-95 shadow-md shadow-blue-500/10"
-            title="Open Enterprise ERP Integration & Electronic Bill of Lading Engine"
-          >
-            <Database size={15} className="text-blue-400" />
-            <span>ERP Integration</span>
-          </button>
+            {/* Legal Documents Dropdown Popover Menu */}
+            {showLegalDocsMenu && (
+              <div className="absolute right-0 top-12 z-50 w-80 p-2.5 rounded-2xl bg-slate-900/95 border border-slate-800 shadow-2xl text-xs font-mono backdrop-blur-xl animate-in fade-in slide-in-from-top-2 space-y-1">
+                <div className="px-3 py-1.5 border-b border-slate-800 text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                  Regulatory Binders & Certificates
+                </div>
 
-          {/* FDA Compliance Audit Binder Button */}
-          <button
-            onClick={() => setShowAuditModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold transition active:scale-95 shadow-md shadow-emerald-500/10"
-            title="Open FDA 21 CFR Part 11 Compliance Audit Binder Engine"
-          >
-            <FileText size={15} className="text-emerald-400" />
-            <span>Audit Binder</span>
-          </button>
+                <button
+                  onClick={() => {
+                    setShowClaimsPortal(true);
+                    setShowLegalDocsMenu(false);
+                  }}
+                  className="w-full text-left p-2.5 rounded-xl hover:bg-purple-500/15 text-purple-200 flex items-center gap-2.5 transition group"
+                >
+                  <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                    <Award size={15} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-white text-[11px] group-hover:text-purple-300 transition">
+                      {t('btn_claims')}
+                    </p>
+
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowErpModal(true);
+                    setShowLegalDocsMenu(false);
+                  }}
+                  className="w-full text-left p-2.5 rounded-xl hover:bg-blue-500/15 text-blue-200 flex items-center gap-2.5 transition group"
+                >
+                  <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    <Database size={15} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-white text-[11px] group-hover:text-blue-300 transition">
+                      {t('btn_erp')}
+                    </p>
+
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowAuditModal(true);
+                    setShowLegalDocsMenu(false);
+                  }}
+                  className="w-full text-left p-2.5 rounded-xl hover:bg-emerald-500/15 text-emerald-200 flex items-center gap-2.5 transition group"
+                >
+                  <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <FileText size={15} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-white text-[11px] group-hover:text-emerald-300 transition">
+                      {t('btn_audit')}
+                    </p>
+
+                  </div>
+                </button>
+
+                <div className="border-t border-slate-800 my-1"></div>
+
+                <button
+                  onClick={() => {
+                    handleDownloadPdfCertificate();
+                    setShowLegalDocsMenu(false);
+                  }}
+                  className="w-full text-left p-2.5 rounded-xl hover:bg-cyan-500/15 text-cyan-200 flex items-center gap-2.5 transition group"
+                >
+                  <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    <Download size={15} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-white text-[11px] group-hover:text-cyan-300 transition">
+                      {t('btn_download_cert')}
+                    </p>
+
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Refresh & Logout Buttons */}
           <button
@@ -304,9 +380,9 @@ export const Dashboard: React.FC = () => {
 
       {/* Real-Time Acoustic Excursion Siren & Web Push Alarm Banner */}
       <AcousticAlarmBanner
-        hasActiveExcursion={!!shipments.find(s => s.temperature !== undefined && s.temperature > -20.0)}
-        excursionTrackingId={shipments.find(s => s.temperature !== undefined && s.temperature > -20.0)?.tracking_id}
-        excursionTemp={shipments.find(s => s.temperature !== undefined && s.temperature > -20.0)?.temperature}
+        hasActiveExcursion={!!excursionShipment}
+        excursionTrackingId={excursionShipment?.tracking_id}
+        excursionTemp={excursionShipment?.temperature}
       />
 
       {/* Metrics Overview Bar */}
@@ -343,7 +419,7 @@ export const Dashboard: React.FC = () => {
             ) : (
               <div className="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col items-center justify-center text-slate-500 text-xs font-mono h-full">
                 <Cpu size={32} className="mb-2 text-slate-700 animate-pulse" />
-                <p>No active shipment selected on telemetry grid.</p>
+                <p>{t('select_shipment_map')}</p>
               </div>
             )}
           </div>

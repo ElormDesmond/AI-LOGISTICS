@@ -7,7 +7,7 @@ from app.database.connection import get_db
 from app.database import crud
 from app.database.models import AgentAction, Shipment, RiskAssessment
 from app.models.action import AgentActionRead, AgentActionApprove
-from app.security.jwt_handler import get_current_user
+from app.security.jwt_handler import get_current_user, require_roles
 
 router = APIRouter(prefix="/actions", tags=["Agent Actions & Approvals"])
 
@@ -70,7 +70,7 @@ def get_multi_agent_negotiation_endpoint(
 def approve_action_endpoint(
     action_id: int,
     approval_in: Optional[AgentActionApprove] = None,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_roles(["ADMIN", "OPERATOR"])),
     db: Session = Depends(get_db)
 ):
     """
@@ -129,7 +129,7 @@ def approve_action_endpoint(
 @router.post("/{action_id}/reject", response_model=AgentActionRead)
 def reject_action_endpoint(
     action_id: int,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_roles(["ADMIN", "OPERATOR"])),
     db: Session = Depends(get_db)
 ):
     """

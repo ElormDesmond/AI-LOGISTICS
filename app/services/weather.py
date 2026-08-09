@@ -20,19 +20,48 @@ class WeatherForecastingService:
     def get_weather_forecast(self, location_name: str = "Frankfurt, Germany") -> Dict[str, Any]:
         """
         Get current weather conditions and 48-hour ambient forecast trend.
+        Integrates with live OpenWeatherMap API if configured.
         """
+        from app.config import settings
+        import httpx
+
+        current_temp_c = None
+        humidity_pct = None
+        condition = None
+
+        if settings.OPENWEATHER_API_KEY:
+            try:
+                # Query OpenWeatherMap Current Weather API
+                city = location_name.split(',')[0].strip()
+                url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={settings.OPENWEATHER_API_KEY}&units=metric"
+                with httpx.Client(timeout=5.0) as client:
+                    resp = client.get(url)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        current_temp_c = round(data["main"]["temp"], 1)
+                        humidity_pct = data["main"]["humidity"]
+                        condition = data["weather"][0]["description"].title()
+            except Exception as exc:
+                pass
+
         base = self.ambient_weather_db.get(location_name, {
             "temp_c": 35.0, "humidity_pct": 60, "solar_uv_index": 7.0, "condition": "Ambient Heat Warning"
         })
+
+        if current_temp_c is None:
+            current_temp_c = base["temp_c"]
+        if humidity_pct is None:
+            humidity_pct = base["humidity_pct"]
+        if condition is None:
+            condition = base["condition"]
 
         hourly_forecast = []
         now = datetime.utcnow()
         for hour in range(48):
             time_label = (now + timedelta(hours=hour)).strftime("%H:00 (%a)")
-            # Diurnal sine wave temperature fluctuation (+/- 6°C peak at 14:00)
             hour_of_day = (now + timedelta(hours=hour)).hour
             temp_var = 5.0 * math.sin((hour_of_day - 9) * math.pi / 12)
-            ambient_temp = round(base["temp_c"] + temp_var, 1)
+            ambient_temp = round(current_temp_c + temp_var, 1)
 
             hourly_forecast.append({
                 "hour": hour,
@@ -43,11 +72,11 @@ class WeatherForecastingService:
 
         return {
             "location": location_name,
-            "current_temp_c": base["temp_c"],
-            "humidity_pct": base["humidity_pct"],
-            "solar_uv_index": base["solar_uv_index"],
-            "condition": base["condition"],
-            "heatwave_alert": base["temp_c"] > 30.0,
+            "current_temp_c": current_temp_c,
+            "humidity_pct": humidity_pct,
+            "solar_uv_index": base.get("solar_uv_index", 6.5),
+            "condition": condition,
+            "heatwave_alert": current_temp_c > 30.0,
             "hourly_forecast": hourly_forecast
         }
 

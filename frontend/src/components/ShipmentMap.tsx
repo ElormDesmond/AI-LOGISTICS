@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shipment } from '../types/api';
 import { InteractiveMap } from './InteractiveMap';
+import { useI18n } from '../i18n/i18nContext';
 import { Navigation, Thermometer, MapPin, Search, Cpu, CheckCircle2, ArrowRight, Globe, LayoutGrid } from 'lucide-react';
 
 interface ShipmentMapProps {
@@ -14,6 +15,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
   selectedShipment,
   onSelectShipment,
 }) => {
+  const { t } = useI18n();
   const [filter, setFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [viewMode, setViewMode] = useState<'map' | 'cards'>('map');
@@ -24,13 +26,13 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
         return {
           color: 'bg-rose-500/20 text-rose-300 border-rose-500/40 glow-rose',
           dot: 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.8)] animate-pulse',
-          label: 'CRITICAL BREACH'
+          label: t('filter_critical').toUpperCase()
         };
       case 'rerouted':
         return {
           color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
           dot: 'bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)]',
-          label: 'REROUTED'
+          label: t('filter_rerouted').toUpperCase()
         };
       case 'delayed':
         return {
@@ -42,13 +44,13 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
         return {
           color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
           dot: 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]',
-          label: 'DELIVERED'
+          label: t('filter_delivered').toUpperCase()
         };
       default:
         return {
           color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
           dot: 'bg-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.8)]',
-          label: 'IN TRANSIT'
+          label: t('filter_in_transit').toUpperCase()
         };
     }
   };
@@ -85,7 +87,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
           </div>
           <div>
             <h2 className="font-display text-lg font-bold text-white tracking-tight">
-              Live Geospatial Telemetry & Map Engine
+              {t('map_engine_title')}
             </h2>
             <p className="text-[11px] text-slate-400 font-mono">
               PostGIS Spatial Routing • Leaflet Vector Tiles • Root-Cause Analytics
@@ -105,7 +107,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
               }`}
             >
               <Globe size={13} />
-              <span>Vector Map</span>
+              <span>{t('vector_map')}</span>
             </button>
             <button
               onClick={() => setViewMode('cards')}
@@ -116,18 +118,18 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
               }`}
             >
               <LayoutGrid size={13} />
-              <span>Telemetry Grid</span>
+              <span>{t('telemetry_grid')}</span>
             </button>
           </div>
 
           {/* Filter Tabs */}
           <div className="flex items-center gap-1 p-1 bg-slate-950/80 border border-slate-800 rounded-xl text-xs overflow-x-auto">
             {[
-              { id: 'all', label: 'All' },
-              { id: 'at_risk', label: 'Critical' },
-              { id: 'rerouted', label: 'Rerouted' },
-              { id: 'in_transit', label: 'In Transit' },
-              { id: 'delivered', label: 'Delivered' }
+              { id: 'all', label: t('filter_all') },
+              { id: 'at_risk', label: t('filter_critical') },
+              { id: 'rerouted', label: t('filter_rerouted') },
+              { id: 'in_transit', label: t('filter_in_transit') },
+              { id: 'delivered', label: t('filter_delivered') }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -152,7 +154,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search by Tracking ID, Origin, Destination, or Carrier..."
+          placeholder={t('search_placeholder')}
           className="w-full bg-slate-950/90 border border-slate-800/80 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 transition font-sans"
         />
       </div>

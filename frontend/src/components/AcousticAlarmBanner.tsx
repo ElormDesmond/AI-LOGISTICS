@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Bell, BellOff, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Volume2, VolumeX, AlertTriangle } from 'lucide-react';
+import { useI18n } from '../i18n/i18nContext';
 
 interface AcousticAlarmBannerProps {
   hasActiveExcursion: boolean;
@@ -12,6 +13,7 @@ export const AcousticAlarmBanner: React.FC<AcousticAlarmBannerProps> = ({
   excursionTrackingId,
   excursionTemp
 }) => {
+  const { t } = useI18n();
   const [muted, setMuted] = useState(false);
   const [audioCtx, setAudioCtx] = useState<AudioContext | null>(null);
 
@@ -49,13 +51,13 @@ export const AcousticAlarmBanner: React.FC<AcousticAlarmBannerProps> = ({
 
       // Trigger Desktop Web Push Notification
       if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(`🚨 CRITICAL THERMAL EXCURSION: ${excursionTrackingId}`, {
+        new Notification(`🚨 ${t('critical_alarm_title')}: ${excursionTrackingId}`, {
           body: `Shipment ${excursionTrackingId} reached +${excursionTemp}°C. Action approval required.`,
           icon: '/favicon.ico'
         });
       }
     }
-  }, [hasActiveExcursion, excursionTrackingId, excursionTemp, muted]);
+  }, [hasActiveExcursion, excursionTrackingId, excursionTemp, muted, t]);
 
   if (!hasActiveExcursion) return null;
 
@@ -67,7 +69,7 @@ export const AcousticAlarmBanner: React.FC<AcousticAlarmBannerProps> = ({
         </div>
         <div>
           <strong className="text-white font-bold block text-xs">
-            CRITICAL THERMAL EXCURSION DETECTED!
+            {t('critical_alarm_title')}
           </strong>
           <span className="text-rose-300 text-[11px]">
             Shipment <strong>{excursionTrackingId}</strong> breached thermal threshold at +{excursionTemp}°C.
@@ -82,7 +84,7 @@ export const AcousticAlarmBanner: React.FC<AcousticAlarmBannerProps> = ({
         }`}
       >
         {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-        <span>{muted ? 'Alarm Muted' : 'Acoustic Siren ON'}</span>
+        <span>{muted ? t('alarm_muted') : t('acoustic_siren_on')}</span>
       </button>
     </div>
   );

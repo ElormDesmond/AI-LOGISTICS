@@ -1,5 +1,6 @@
 import React from 'react';
 import { Package, ShieldAlert, Clock, ThermometerSnowflake, Activity, TrendingUp, Sparkles } from 'lucide-react';
+import { useI18n } from '../i18n/i18nContext';
 
 interface MetricsOverviewProps {
   totalShipments: number;
@@ -14,6 +15,8 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
   pendingApprovalsCount,
   avgTemperature = -22.4,
 }) => {
+  const { t } = useI18n();
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
       {/* Total Shipments Card */}
@@ -21,7 +24,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
         <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition"></div>
         <div>
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
-            <span>Total Active Shipments</span>
+            <span>{t('metrics_active_shipments')}</span>
           </p>
           <div className="flex items-baseline gap-2 mt-2">
             <p className="font-display text-3xl font-extrabold text-white">{totalShipments}</p>
@@ -43,7 +46,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
         <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition"></div>
         <div>
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-            Critical Thermal Risks
+            {t('metrics_at_risk')}
           </p>
           <div className="flex items-baseline gap-2 mt-2">
             <p className={`font-display text-3xl font-extrabold ${atRiskCount > 0 ? 'text-rose-500' : 'text-slate-200'}`}>
@@ -51,12 +54,12 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
             </p>
             {atRiskCount > 0 && (
               <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-full animate-pulse">
-                ACTION REQ
+                {t('action_req')}
               </span>
             )}
           </div>
           <p className="text-[11px] text-rose-400/90 mt-2 font-mono">
-            {atRiskCount > 0 ? 'Requires Operator Decision' : 'Zero Breaches Detected'}
+            {atRiskCount > 0 ? 'Requires Operator Decision' : t('zero_breaches')}
           </p>
         </div>
         <div className={`p-3.5 rounded-2xl border transition duration-300 group-hover:scale-110 ${
@@ -73,7 +76,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
         <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition"></div>
         <div>
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-            Actions Awaiting Approval
+            {t('metrics_pending_actions')}
           </p>
           <div className="flex items-baseline gap-2 mt-2">
             <p className={`font-display text-3xl font-extrabold ${pendingApprovalsCount > 0 ? 'text-amber-400' : 'text-slate-200'}`}>
@@ -81,12 +84,12 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
             </p>
             {pendingApprovalsCount > 0 && (
               <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full">
-                AI PROPOSED
+                {t('ai_proposed')}
               </span>
             )}
           </div>
           <p className="text-[11px] text-amber-300/80 mt-2 font-mono">
-            {pendingApprovalsCount > 0 ? 'Agent Mitigation Queued' : 'Queue Empty & Safe'}
+            {pendingApprovalsCount > 0 ? 'Agent Mitigation Queued' : t('queue_safe')}
           </p>
         </div>
         <div className={`p-3.5 rounded-2xl border transition duration-300 group-hover:scale-110 ${
@@ -103,7 +106,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
         <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl group-hover:bg-cyan-500/20 transition"></div>
         <div>
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-            Fleet Avg Thermal Buffer
+            {t('metrics_thermal_buffer')}
           </p>
           <div className="flex items-baseline gap-2 mt-2">
             <p className="font-display text-3xl font-extrabold text-cyan-400 font-mono">

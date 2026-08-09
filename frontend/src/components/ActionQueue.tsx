@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { AgentAction } from '../types/api';
 import { useActionHistory } from '../hooks/useActions';
 import { ActionApprovalModal } from './ActionApprovalModal';
-import { ShieldAlert, ChevronRight, CheckCircle2, DollarSign, TrendingDown, History, ShieldCheck, ArrowRight } from 'lucide-react';
+import { useI18n } from '../i18n/i18nContext';
+import { ShieldAlert, CheckCircle2, DollarSign, TrendingDown, History, ShieldCheck, ArrowRight } from 'lucide-react';
 
 interface ActionQueueProps {
   pendingActions: AgentAction[];
@@ -15,6 +16,7 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
   onApprove,
   onReject,
 }) => {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<'pending' | 'history'>('pending');
   const [selectedAction, setSelectedAction] = useState<AgentAction | null>(null);
   const { data: actionHistory = [] } = useActionHistory();
@@ -29,10 +31,10 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
           </div>
           <div>
             <h2 className="font-display text-base font-bold text-white tracking-tight">
-              Action Approval Queue
+              {t('action_queue_title')}
             </h2>
             <p className="text-[11px] text-slate-400 font-mono">
-              Human-in-the-Loop Operator Verification
+              {t('action_queue_subtitle')}
             </p>
           </div>
         </div>
@@ -47,7 +49,7 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>Pending ({pendingActions.length})</span>
+            <span>{t('tab_pending')} ({pendingActions.length})</span>
           </button>
 
           <button
@@ -59,7 +61,7 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
             }`}
           >
             <History size={12} />
-            <span>History ({actionHistory.length})</span>
+            <span>{t('tab_history')} ({actionHistory.length})</span>
           </button>
         </div>
       </div>
@@ -71,9 +73,9 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
             <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-2 shadow-lg shadow-emerald-500/10">
               <CheckCircle2 size={28} />
             </div>
-            <h3 className="font-display text-sm font-bold text-slate-200">All Queue Actions Cleared</h3>
+            <h3 className="font-display text-sm font-bold text-slate-200">{t('all_cleared_title')}</h3>
             <p className="text-[11px] text-slate-500 mt-1 max-w-xs font-sans">
-              No pending agent disruption mitigation proposals require operator intervention.
+              {t('all_cleared_desc')}
             </p>
           </div>
         ) : (
@@ -111,7 +113,7 @@ export const ActionQueue: React.FC<ActionQueueProps> = ({
                     onClick={() => setSelectedAction(action)}
                     className="w-full mt-1.5 py-2 px-3 bg-gradient-to-r from-amber-600/30 to-rose-600/30 hover:from-amber-600/40 hover:to-rose-600/40 border border-amber-500/40 text-amber-200 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition active:scale-[0.99] shadow-md shadow-amber-500/10"
                   >
-                    <span>Review & Approve Reroute</span>
+                    <span>{t('review_approve_btn')}</span>
                     <ArrowRight size={14} />
                   </button>
                 </div>

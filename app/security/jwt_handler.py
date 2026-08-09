@@ -81,5 +81,21 @@ def get_current_user(
     return {
         "user_id": int(user_id),
         "company_id": int(company_id),
-        "role": role or "operator"
+        "role": (role or "operator").upper()
     }
+
+def require_roles(allowed_roles: list[str]):
+    """
+    Dependency generator enforcing Role-Based Access Control (RBAC).
+    Restricts write/action endpoints to authorized roles (e.g. ADMIN, OPERATOR).
+    """
+    def role_checker(current_user: Dict[str, Any] = Depends(get_current_user)):
+        user_role = current_user.get("role", "").upper()
+        allowed_upper = [r.upper() for r in allowed_roles]
+        if user_role not in allowed_upper:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Role '{user_role}' is not authorized to perform this operation. Required: {allowed_roles}"
+            )
+        return current_user
+    return role_checker

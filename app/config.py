@@ -17,9 +17,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY", "gAAAAABmX_1234567890abcdefghijklmnopqrstuvwxyz=")
     
-    # AI Engine
+    # AI Engine & Services
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    OPENWEATHER_API_KEY: str = os.getenv("OPENWEATHER_API_KEY", "")
 
     class Config:
         env_file = ".env"

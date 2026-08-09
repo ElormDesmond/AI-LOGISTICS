@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../utils/api';
-import { Sun, Thermometer, AlertTriangle, Clock, ShieldAlert, Cpu, Flame } from 'lucide-react';
+import { useI18n } from '../i18n/i18nContext';
+import { Sun, Clock, Cpu, Flame } from 'lucide-react';
 
 interface ThermalDecayChartProps {
   shipmentId: number;
 }
 
 export const ThermalDecayChart: React.FC<ThermalDecayChartProps> = ({ shipmentId }) => {
+  const { t } = useI18n();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +33,7 @@ export const ThermalDecayChart: React.FC<ThermalDecayChartProps> = ({ shipmentId
     return (
       <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs font-mono text-slate-400 flex items-center justify-center gap-2">
         <Cpu size={16} className="animate-spin text-amber-400" />
-        <span>Calculating 48-Hour Thermal Decay & Weather Solar Impact...</span>
+        <span>Calculating Thermal Decay & Weather Impact...</span>
       </div>
     );
   }
@@ -50,14 +52,14 @@ export const ThermalDecayChart: React.FC<ThermalDecayChartProps> = ({ shipmentId
             <Sun size={16} />
           </div>
           <div>
-            <h4 className="font-bold text-white tracking-wide text-xs">48-Hr Weather & Thermal Decay Analytics</h4>
+            <h4 className="font-bold text-white tracking-wide text-xs">{t('thermal_analytics_title')}</h4>
             <p className="text-[10px] text-slate-400 font-sans">Newton's Cooling Model & Solar Heatwave Forecasting</p>
           </div>
         </div>
 
         {/* Time To Failure (TTF) Badge */}
         <div className="text-right">
-          <span className="text-[9px] text-slate-400 uppercase block">Time-To-Failure</span>
+          <span className="text-[9px] text-slate-400 uppercase block">{t('time_to_failure')}</span>
           <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded border font-mono ${
             thermal_decay.time_to_failure_hours && thermal_decay.time_to_failure_hours < 8
               ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 glow-rose animate-pulse'
